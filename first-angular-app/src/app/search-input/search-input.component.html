@@ -1,0 +1,12 @@
+<input
+  type="text"
+  class="search-input-elem"
+  placeholder="Type something for search..."
+  [(ngModel)]="inputValue"
+  (keyup.enter)="addSearchInput()">
+
+<button
+  class="search-button-elem"
+  (click)="addSearchInput()">
+    Search
+</button>
