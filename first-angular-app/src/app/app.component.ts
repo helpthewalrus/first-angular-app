@@ -1,18 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-
 export class AppComponent {
-  searchInput = '';
-  title = 'first-angular-app';
+  public inputValue: string;
 
-  constructor() {}
-
-  updateParagraph(input) {
-    this.searchInput = input;
+  public updateParagraph(input: string): void {
+    this.inputValue = input;
   }
 }

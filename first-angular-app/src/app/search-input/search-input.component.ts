@@ -1,21 +1,21 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, ChangeDetectionStrategy } from "@angular/core";
 
 @Component({
-  selector: 'app-search-input',
-  templateUrl: './search-input.component.html',
-  styleUrls: ['./search-input.component.css']
+  selector: "app-search-input",
+  templateUrl: "./search-input.component.html",
+  styleUrls: ["./search-input.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchInputComponent {
-  @Output() onAdd: EventEmitter<string> = new EventEmitter()
-  inputValue = '';
+  @Output() public add: EventEmitter<string> = new EventEmitter();
+  public searchInput = "";
 
-  constructor() { }
-
-  addSearchInput() {
-    if (this.inputValue.trim()) {
-      const searchInput = this.inputValue;
-      this.onAdd.emit(searchInput);
-      this.inputValue = '';
+  public addSearchInput(): void {
+    console.log("haha");
+    if (this.searchInput.trim()) {
+      const searchInput: string = this.searchInput;
+      this.add.emit(searchInput);
+      this.searchInput = "";
     }
   }
 }
