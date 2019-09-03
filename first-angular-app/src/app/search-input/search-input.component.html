@@ -1,0 +1,11 @@
+<form #values="ngForm" (ngSubmit)="addSearchInput(values)">
+  <input
+    type="text"
+    name="search-field"
+    class="search-input-elem"
+    placeholder="Type something for search..."
+    [(ngModel)]="searchInput"
+  />
+
+  <input type="submit" name="search-submit" value="Search" class="search-button-elem" />
+</form>
