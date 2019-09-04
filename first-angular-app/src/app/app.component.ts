@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef } from "@angular/core";
+import { SearchResultService } from "./services/search-result.service";
 
 @Component({
   selector: "app-root",
@@ -7,9 +8,18 @@ import { Component, ChangeDetectionStrategy } from "@angular/core";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
-  public inputValue: string;
+  public loading = false;
+  public inputValue = "";
+  public resultMovies = [];
 
-  public updateParagraph(input: string): void {
-    this.inputValue = input;
+  constructor(private searchResultService: SearchResultService, private cdr: ChangeDetectorRef) {}
+
+  public fetchMoviesTitles(movieName: string): any {
+    this.loading = true;
+    this.searchResultService.fetchMoviesTitles(movieName).subscribe((response: any): void => {
+      this.resultMovies = response;
+      this.loading = false;
+      this.cdr.detectChanges(); // DETECT CHANGES IN COMPONENT AND ITS CHILDREN
+    });
   }
 }

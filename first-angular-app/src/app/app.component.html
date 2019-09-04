@@ -1,5 +1,10 @@
 <h1>Cinema App</h1>
 
-<app-search-input (add)="updateParagraph($event)"></app-search-input>
+<app-search-input (add)="fetchMoviesTitles($event)"></app-search-input>
 
-<p>{{ inputValue }}</p>
+<ul *ngIf="!loading; else loadingBlock">
+  <li *ngFor="let movie of resultMovies">{{ movie }}</li>
+</ul>
+<ng-template #loadingBlock>
+  <p>Loading...</p>
+</ng-template>

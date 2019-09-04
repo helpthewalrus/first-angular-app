@@ -11,7 +11,6 @@ export class SearchInputComponent {
   public searchInput = "";
 
   public addSearchInput(): void {
-    console.log("haha");
     if (this.searchInput.trim()) {
       const searchInput: string = this.searchInput;
       this.add.emit(searchInput);
