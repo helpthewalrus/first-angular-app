@@ -1,0 +1,23 @@
+.app-headline {
+  text-align: center;
+}
+
+.films-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.films-list .film-item {
+  height: 30px;
+  max-width: 30rem;
+}
+
+.film-item:nth-child(odd) {
+  background-color: #cccccc;
+}
+
+.loading-item {
+  text-align: center;
+  font-size: 18px;
+}
