@@ -6,10 +6,4 @@ import { Component, ChangeDetectionStrategy } from "@angular/core";
   styleUrls: ["./app.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent {
-  public inputValue: string;
-
-  public updateParagraph(input: string): void {
-    this.inputValue = input;
-  }
-}
+export class AppComponent {}

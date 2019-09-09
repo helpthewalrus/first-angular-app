@@ -1,0 +1,8 @@
+<h1 class="mat-display-1 app-headline">Films App</h1>
+
+<app-search-input (add)="fetchMoviesTitles($event)"></app-search-input>
+
+<p class="mat-body-2 loading-item" *ngIf="isLoading">Loading...</p>
+<mat-list class="films-list">
+  <mat-list-item class="film-item" *ngFor="let movie of resultMovies | async">{{ movie.title }}</mat-list-item>
+</mat-list>

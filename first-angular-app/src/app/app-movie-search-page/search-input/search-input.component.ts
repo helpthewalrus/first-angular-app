@@ -7,11 +7,16 @@ import { Component, Output, EventEmitter, ChangeDetectionStrategy } from "@angul
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchInputComponent {
+  /** create EventEmitter object to emit value provided in search input */
   @Output() public add: EventEmitter<string> = new EventEmitter();
-  public searchInput = "";
 
+  /** variable used to keep search input value */
+  public searchInput: string = "";
+
+  /**
+   * when form submitted emit input value and clears input field
+   */
   public addSearchInput(): void {
-    console.log("haha");
     if (this.searchInput.trim()) {
       const searchInput: string = this.searchInput;
       this.add.emit(searchInput);
