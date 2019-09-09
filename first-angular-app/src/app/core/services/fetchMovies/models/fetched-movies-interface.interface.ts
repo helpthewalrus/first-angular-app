@@ -1,8 +1,8 @@
-import { MovieDataInterface } from "./movie-data-interface.interface";
+import { MovieData } from "./movie-data-interface.interface";
 
-export interface FetchedMoviesInterface {
+export interface FetchedMovies {
   page: number;
   total_results: number;
   total_pages: number;
-  results: MovieDataInterface[];
+  results: MovieData[];
 }

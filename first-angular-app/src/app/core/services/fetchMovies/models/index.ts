@@ -1,2 +1,2 @@
-export { FetchedMoviesInterface } from "./fetched-movies-interface.interface";
-export { MovieDataInterface } from "./movie-data-interface.interface";
+export { FetchedMovies } from "./fetched-movies-interface.interface";
+export { MovieData } from "./movie-data-interface.interface";

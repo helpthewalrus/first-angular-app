@@ -2,11 +2,11 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { map, filter } from "rxjs/operators";
 
 import { constants } from "../../constants";
 
-import { MovieDataInterface, FetchedMoviesInterface } from "./models/index";
+import { MovieData, FetchedMovies } from "./models/index";
 
 @Injectable()
 export class FetchMoviesService {
@@ -22,7 +22,7 @@ export class FetchMoviesService {
    *
    * @param movieName - search input value used to fetch movies from server
    */
-  public fetchMovies(movieName: string): Observable<MovieDataInterface[]> {
+  public fetchMovies(movieName: string): Observable<MovieData[]> {
     let params: HttpParams = new HttpParams();
     params = params.append("api_key", constants.API_KEY);
     params = params.append("language", "en-US");
@@ -31,12 +31,15 @@ export class FetchMoviesService {
     params = params.append("include_adult", "false");
 
     return this.http
-      .get<FetchedMoviesInterface>(constants.BASE_URL, {
+      .get<FetchedMovies>(constants.BASE_URL, {
         params
       })
       .pipe(
-        map((data: FetchedMoviesInterface) => {
-          return data.results;
+        // filter((data: FetchedMovies) => data.results.length > 0),
+        map((data: FetchedMovies) => {
+          if (data.results.length > 0) {
+            return data.results;
+          }
         })
       );
   }

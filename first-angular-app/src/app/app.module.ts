@@ -7,7 +7,7 @@ import { HttpClientModule } from "@angular/common/http";
 
 import { AppComponent } from "./app.component";
 
-import { AppMovieSearchPageModule } from "./app-movie-search-page/app-movie-search-page.module";
+import { AppMovieSearchPageModule } from "./app-movie-search-page/index";
 import { CoreModule } from "./core/index";
 
 @NgModule({
