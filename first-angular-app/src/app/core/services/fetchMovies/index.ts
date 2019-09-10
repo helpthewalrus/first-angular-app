@@ -1,2 +1,2 @@
 export { FetchMoviesService } from "./fetch-movies.service";
-export { FetchedMovies, MovieData } from "./models/index";
+export { FetchedMovies, MovieData, AdditionalMovieData, MovieCastData, JoinedMovieData } from "./models/index";

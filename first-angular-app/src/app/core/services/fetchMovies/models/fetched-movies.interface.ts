@@ -1,4 +1,4 @@
-import { MovieData } from "./movie-data-interface.interface";
+import { MovieData } from "./movie-data.interface";
 
 export interface FetchedMovies {
   page: number;
