@@ -30,7 +30,7 @@ export class AppMovieSearchPageComponent {
    *
    * @param movieName - input value used to search movies
    */
-  public fetchMoviesTitles(movieName: string): void {
+  public fetchMovies(movieName: string): void {
     this.isLoading = true;
     this.resultMovies = this.fetchMoviesService.fetchMovies(movieName).pipe(tap(() => (this.isLoading = false)));
   }

@@ -4,13 +4,23 @@ import { FormsModule } from "@angular/forms";
 import { MatInputModule } from "@angular/material/input";
 import { MatButtonModule } from "@angular/material/button";
 import { MatListModule } from "@angular/material/list";
+import { MatCardModule } from "@angular/material/card";
+import { MatGridListModule } from "@angular/material/grid-list";
 
 import { AppMovieSearchPageComponent } from "./app-movie-search-page.component";
 import { SearchInputComponent } from "./search-input/search-input.component";
 
 @NgModule({
   declarations: [AppMovieSearchPageComponent, SearchInputComponent],
-  imports: [CommonModule, FormsModule, MatInputModule, MatButtonModule, MatListModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatInputModule,
+    MatButtonModule,
+    MatListModule,
+    MatCardModule,
+    MatGridListModule
+  ],
   providers: [],
   exports: [AppMovieSearchPageComponent]
 })
