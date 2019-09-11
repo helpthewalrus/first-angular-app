@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 
-import { Observable, forkJoin, of, throwError } from "rxjs";
-import { map, concatMap, catchError, tap, distinctUntilChanged } from "rxjs/operators";
+import { Observable, forkJoin, of } from "rxjs";
+import { map, concatMap } from "rxjs/operators";
 
 import { constants } from "../../constants";
 
 import { MovieData, FetchedMovies, AdditionalMovieData, JoinedMovieData } from "./models/index";
+import { joinedMovieObject } from "../../utilities/joined-movie-object.utility";
 
 @Injectable()
 export class FetchMoviesService {
@@ -51,7 +52,7 @@ export class FetchMoviesService {
           },
           (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
             if (movies.length && moviesInfo.length) {
-              return this.createDataObject(movies, moviesInfo);
+              return joinedMovieObject(movies, moviesInfo);
             }
             return [];
           }
@@ -79,22 +80,5 @@ export class FetchMoviesService {
     params = params.append("append_to_response", "credits");
 
     return this.http.get(`${constants.MOVIE_INFO_URL}${movieId}`, { params });
-  }
-
-  /**
-   * create array of objects with combined data about movies and their cast
-   *
-   * @param movies - array with fetched data about movies
-   * @param moviesInfo - array with fetched data about movies' cast
-   */
-  public createDataObject(movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>): Array<JoinedMovieData> {
-    return movies.map((movie: MovieData, index: number) => ({
-      movieId: movie.id,
-      movieTitle: movie.title,
-      movieOverview: movie.overview,
-      movieReleaseDate: movie.release_date,
-      moviePoster: movie.poster_path,
-      moviesAddInfo: moviesInfo[index].credits.cast.slice(0, 5)
-    }));
   }
 }

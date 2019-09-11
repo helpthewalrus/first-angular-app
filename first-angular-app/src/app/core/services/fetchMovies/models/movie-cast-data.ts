@@ -3,7 +3,7 @@ export interface MovieCastData {
   character?: string;
   credit_id?: string;
   gender?: number;
-  id: 204;
+  id: number;
   name: string;
   order: number;
   profile_path: string;

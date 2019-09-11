@@ -9,10 +9,11 @@ import { MatGridListModule } from "@angular/material/grid-list";
 
 import { AppMovieSearchPageComponent } from "./app-movie-search-page.component";
 import { SearchInputComponent } from "./search-input/search-input.component";
-import { MovieListComponentComponent } from "./movie-list-component/movie-list-component.component";
+import { MovieListComponent } from "./movie-list/movie-list.component";
+import { MovieListItemComponent } from "./movie-list-item/movie-list-item.component";
 
 @NgModule({
-  declarations: [AppMovieSearchPageComponent, SearchInputComponent, MovieListComponentComponent],
+  declarations: [AppMovieSearchPageComponent, SearchInputComponent, MovieListComponent, MovieListItemComponent],
   imports: [
     CommonModule,
     FormsModule,

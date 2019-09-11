@@ -1,0 +1,58 @@
+<div class="movie-card-wrapper">
+  <mat-grid-list class="movie-card" cols="5" rowHeight="30px" [gutterSize]="'5px'">
+    <mat-grid-tile colspan="5" rowspan="2">
+      <h2 class="mat-title movie-title">
+        {{ movie.movieTitle }}
+      </h2>
+    </mat-grid-tile>
+
+    <mat-grid-tile colspan="5" rowspan="1">
+      <p class="mat-body-2" *ngIf="movie.movieReleaseDate; else noReleaseDate">
+        {{ movie.movieReleaseDate | date }}
+      </p>
+      <ng-template #noReleaseDate>
+        <p class="mat-body-2">-- -- --</p>
+      </ng-template>
+    </mat-grid-tile>
+
+    <mat-grid-tile colspan="2" rowspan="14">
+      <img
+        class="movie-poster"
+        mat-card-image
+        [src]="
+          movie.moviePoster
+            ? 'https://image.tmdb.org/t/p/w300/' + movie.moviePoster
+            : 'https://static.thenounproject.com/png/340719-200.png'
+        "
+        alt="{{ movie.movieTitle }}"
+      />
+    </mat-grid-tile>
+
+    <mat-grid-tile colspan="3" rowspan="14">
+      <p class="mat-body-2 movie-overview" *ngIf="movie.movieOverview; else noOverview">
+        {{ movie.movieOverview }}
+      </p>
+      <ng-template #noOverview>
+        <p class="mat-body-2">There is no film overview</p>
+      </ng-template>
+    </mat-grid-tile>
+
+    <div *ngFor="let movieActor of movie.moviesAddInfo">
+      <mat-grid-tile class="actor-card" colspan="1" rowspan="7">
+        <div class="actor-card-wrapper">
+          <img
+            class="actor-avatar"
+            mat-card-image
+            [src]="
+              movieActor.profile_path
+                ? 'https://image.tmdb.org/t/p/w300/' + movieActor.profile_path
+                : 'https://static.thenounproject.com/png/340719-200.png'
+            "
+            alt="{{ movieActor.name }}"
+          />
+          <p class="mat-body-2 actor-name">{{ movieActor.name }}</p>
+        </div>
+      </mat-grid-tile>
+    </div>
+  </mat-grid-list>
+</div>

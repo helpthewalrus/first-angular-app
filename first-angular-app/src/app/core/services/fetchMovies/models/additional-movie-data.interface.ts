@@ -1,4 +1,7 @@
 import { MovieCastData } from "./movie-cast-data";
+import { MovieGenres } from "./movie-genres.interface";
+import { ProductionCompanies } from "./production-companies.interface";
+import { SpokenLanguages } from "./spoken-languages.interface";
 
 export interface AdditionalMovieData {
   adult?: boolean;
@@ -6,7 +9,7 @@ export interface AdditionalMovieData {
   belongs_to_collection?: null;
   budget?: number;
   credits: { cast: Array<MovieCastData>; crew?: Array<any> };
-  genres?: Array<object>;
+  genres?: Array<MovieGenres>;
   homepage?: null;
   id: number;
   imdb_id?: string;
@@ -15,11 +18,11 @@ export interface AdditionalMovieData {
   overview: string;
   popularity?: number;
   poster_path: string;
-  production_companies?: Array<object>;
+  production_companies?: Array<ProductionCompanies>;
   release_date: string;
   revenue?: number;
   runtime?: number;
-  spoken_languages?: Array<object>;
+  spoken_languages?: Array<SpokenLanguages>;
   status?: string;
   tagline?: string;
   title: string;
