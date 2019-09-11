@@ -2,47 +2,93 @@
 
 <app-search-input (add)="fetchMovies($event)"></app-search-input>
 
-<p class="mat-body-2 loading-item" *ngIf="isLoading">Loading...</p>
+<p class="loading-item mat-body-2" *ngIf="noInputProvided">Enter something for search.</p>
 
-<div class="cards-wrapper">
-  <div class="movie-card-wrapper" *ngFor="let movie of resultMovies | async">
-    <mat-grid-list class="movie-card" cols="5" rowHeight="30px" [gutterSize]="'5px'">
-      <mat-grid-tile colspan="5" rowspan="2">
-        <h2 class="mat-title movie-title">
-          {{ movie.movieTitle }}
-        </h2>
-      </mat-grid-tile>
-      <mat-grid-tile colspan="5" rowspan="1">
-        <p class="mat-body-2">
-          {{ movie.movieReleaseDate | date }}
-        </p>
-      </mat-grid-tile>
-      <mat-grid-tile colspan="2" rowspan="14">
-        <img
-          class="movie-poster"
-          mat-card-image
-          src="https://image.tmdb.org/t/p/w300/{{ movie.moviePoster }}"
-          alt="{{ movie.movieTitle }}"
-        />
-      </mat-grid-tile>
-      <mat-grid-tile colspan="3" rowspan="14">
-        <p class="mat-body-2 movie-overview truncate">
-          {{ movie.movieOverview }}
-        </p>
-      </mat-grid-tile>
-      <div *ngFor="let movieActor of movie.moviesAddInfo">
-        <mat-grid-tile class="actor-card" colspan="1" rowspan="6" *ngIf="movieActor.profile_path !== null">
-          <div class="actor-card-wrapper">
+<ng-container *ngIf="resultMovies | async as moviesInfo; else loading">
+  <ng-container *ngIf="moviesInfo.length; else noMoviesFound">
+    <div class="cards-wrapper">
+      <div class="movie-card-wrapper" *ngFor="let movie of moviesInfo">
+        <mat-grid-list class="movie-card" cols="5" rowHeight="30px" [gutterSize]="'5px'">
+          <mat-grid-tile colspan="5" rowspan="2">
+            <h2 class="mat-title movie-title">
+              {{ movie.movieTitle }}
+            </h2>
+          </mat-grid-tile>
+
+          <mat-grid-tile colspan="5" rowspan="1">
+            <p class="mat-body-2" *ngIf="movie.movieReleaseDate; else noReleaseDate">
+              {{ movie.movieReleaseDate | date }}
+            </p>
+            <ng-template #noReleaseDate>
+              <p class="mat-body-2">-- -- --</p>
+            </ng-template>
+          </mat-grid-tile>
+
+          <mat-grid-tile colspan="2" rowspan="14">
             <img
-              class="actor-avatar"
+              *ngIf="movie.moviePoster; else noPoster"
+              class="movie-poster"
               mat-card-image
-              src="https://image.tmdb.org/t/p/w300/{{ movieActor.profile_path }}"
-              alt="{{ movieActor.name }}"
+              src="https://image.tmdb.org/t/p/w300/{{ movie.moviePoster }}"
+              alt="{{ movie.movieTitle }}"
             />
-            <p class="mat-body-2 actor-name">{{ movieActor.name }}</p>
+            <ng-template #noPoster>
+              <img
+                class="actor-avatar"
+                mat-card-image
+                src="https://static.thenounproject.com/png/340719-200.png"
+                alt="No image provided"
+              />
+            </ng-template>
+          </mat-grid-tile>
+
+          <mat-grid-tile colspan="3" rowspan="14">
+            <p class="mat-body-2 movie-overview" *ngIf="movie.movieOverview; else noOverview">
+              {{ movie.movieOverview }}
+            </p>
+            <ng-template #noOverview>
+              <p class="mat-body-2">There is no film overview</p>
+            </ng-template>
+          </mat-grid-tile>
+
+          <div *ngFor="let movieActor of movie.moviesAddInfo">
+            <mat-grid-tile class="actor-card" colspan="1" rowspan="7">
+              <div class="actor-card-wrapper">
+                <img
+                  *ngIf="movieActor.profile_path; else noAvatar"
+                  class="actor-avatar"
+                  mat-card-image
+                  src="https://image.tmdb.org/t/p/w300/{{ movieActor.profile_path }}"
+                  alt="{{ movieActor.name }}"
+                />
+                <ng-template #noAvatar>
+                  <img
+                    class="actor-avatar"
+                    mat-card-image
+                    src="https://static.thenounproject.com/png/340719-200.png"
+                    alt="No image provided"
+                  />
+                </ng-template>
+                <p class="mat-body-2 actor-name">{{ movieActor.name }}</p>
+              </div>
+            </mat-grid-tile>
           </div>
-        </mat-grid-tile>
+        </mat-grid-list>
       </div>
-    </mat-grid-list>
-  </div>
-</div>
+    </div>
+  </ng-container>
+
+  <ng-template #noMoviesFound>
+    <p class="loading-item mat-body-2">
+      There are no movies that matched your query.
+    </p>
+  </ng-template>
+</ng-container>
+
+<ng-template #loading>
+  <ng-container *ngIf="isLoading">
+    <p class="loading-item mat-body-2">
+      Loading ...
+    </p>
+  </ng-container>
+</ng-template>

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from "@angular/core";
 
-import { Observable } from "rxjs";
-import { tap } from "rxjs/operators";
+import { Observable, of } from "rxjs";
+import { tap, catchError } from "rxjs/operators";
 
 import { FetchMoviesService, JoinedMovieData } from "../../core/index";
 
@@ -17,8 +17,11 @@ export class MovieListComponentComponent {
   /** indicator used for loading data from server */
   public isLoading: boolean = false;
 
+  /** indicator used for reflecting paragraph if no input provided */
+  public noInputProvided: boolean = false;
+
   /** observable which contains array of found movies' data */
-  public resultMovies: Observable<Array<JoinedMovieData>>;
+  public resultMovies: Observable<Array<JoinedMovieData>> = null;
 
   constructor(fetchMoviesService: FetchMoviesService) {
     this.fetchMoviesService = fetchMoviesService;
@@ -27,11 +30,19 @@ export class MovieListComponentComponent {
   /**
    * search movies on the server and put result into resultMovies variable,
    * change state of paragraph with loading state
+   * change state of paragraph if no input provided
    *
    * @param movieName - input value used to search movies
    */
   public fetchMovies(movieName: string): void {
-    this.isLoading = true;
-    this.resultMovies = this.fetchMoviesService.fetchMovies(movieName).pipe(tap(() => (this.isLoading = false)));
+    if (!movieName.trim()) {
+      this.noInputProvided = true;
+      this.resultMovies = null;
+    } else {
+      this.noInputProvided = false;
+      this.isLoading = true;
+
+      this.resultMovies = this.fetchMoviesService.fetchMovies(movieName).pipe(tap(() => (this.isLoading = false)));
+    }
   }
 }

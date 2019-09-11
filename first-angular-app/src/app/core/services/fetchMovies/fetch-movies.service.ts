@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 
-import { Observable, forkJoin } from "rxjs";
-import { map, concatMap } from "rxjs/operators";
+import { Observable, forkJoin, of, throwError } from "rxjs";
+import { map, concatMap, catchError, tap, distinctUntilChanged } from "rxjs/operators";
 
 import { constants } from "../../constants";
 
@@ -39,22 +39,23 @@ export class FetchMoviesService {
           if (data.results.length > 0) {
             return data.results;
           }
+          return [];
         }),
         concatMap(
           (movies: Array<MovieData>) => {
-            return this.parseFetchedMoviesData(movies);
+            if (movies.length > 0) {
+              return this.parseFetchedMoviesData(movies);
+            } else {
+              return of([]);
+            }
           },
           (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
-            return this.createDataObject(movies, moviesInfo);
-          }
-        ),
-        map((moviesData: Array<JoinedMovieData>) => {
-          return moviesData.filter((item: JoinedMovieData) => {
-            if (item.movieOverview && item.moviePoster && item.movieReleaseDate && item.movieTitle) {
-              return item;
+            if (movies.length && moviesInfo.length) {
+              return this.createDataObject(movies, moviesInfo);
             }
-          });
-        })
+            return [];
+          }
+        )
       );
   }
 
