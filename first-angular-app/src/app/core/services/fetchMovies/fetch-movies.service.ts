@@ -7,7 +7,7 @@ import { map, concatMap } from "rxjs/operators";
 import { constants } from "../../constants";
 
 import { MovieData, FetchedMovies, AdditionalMovieData, JoinedMovieData } from "./models/index";
-import { joinedMovieObject } from "../../utilities/joined-movie-object.utility";
+import { joinedMovieObject } from "../../utilities/index";
 
 @Injectable()
 export class FetchMoviesService {
