@@ -6,7 +6,7 @@ import { FetchMoviesService } from "./fetchMovies";
 
 @NgModule({
   declarations: [],
-  imports: [CommonModule],
+  imports: [CommonModule, HttpClientModule],
   providers: [FetchMoviesService]
 })
 export class ServicesModule {}

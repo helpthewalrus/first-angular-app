@@ -3,8 +3,7 @@ import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 
-import { FetchMoviesService, MovieData } from "../core/index";
-
+import { FetchMoviesService, JoinedMovieData } from "../core/index";
 @Component({
   selector: "app-app-movie-search-page",
   templateUrl: "./app-movie-search-page.component.html",
@@ -17,8 +16,11 @@ export class AppMovieSearchPageComponent {
   /** indicator used for loading data from server */
   public isLoading: boolean = false;
 
-  /** observable which contains array of found mouvies' data */
-  public resultMovies: Observable<Array<MovieData>>;
+  /** indicator used for reflecting paragraph if no input provided */
+  public noInputProvided: boolean = false;
+
+  /** observable which contains array of found movies' data */
+  public resultMovies: Observable<Array<JoinedMovieData>> = null;
 
   constructor(fetchMoviesService: FetchMoviesService) {
     this.fetchMoviesService = fetchMoviesService;
@@ -27,11 +29,19 @@ export class AppMovieSearchPageComponent {
   /**
    * search movies on the server and put result into resultMovies variable,
    * change state of paragraph with loading state
+   * change state of paragraph if no input provided
    *
    * @param movieName - input value used to search movies
    */
-  public fetchMoviesTitles(movieName: string): void {
-    this.isLoading = true;
-    this.resultMovies = this.fetchMoviesService.fetchMovies(movieName).pipe(tap(() => (this.isLoading = false)));
+  public fetchMovies(movieName: string): void {
+    if (!movieName.trim()) {
+      this.noInputProvided = true;
+      this.resultMovies = null;
+    } else {
+      this.noInputProvided = false;
+      this.isLoading = true;
+
+      this.resultMovies = this.fetchMoviesService.fetchMovies(movieName).pipe(tap(() => (this.isLoading = false)));
+    }
   }
 }

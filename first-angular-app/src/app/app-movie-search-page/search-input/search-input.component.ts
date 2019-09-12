@@ -17,10 +17,8 @@ export class SearchInputComponent {
    * when form submitted emit input value and clears input field
    */
   public addSearchInput(): void {
-    if (this.searchInput.trim()) {
-      const searchInput: string = this.searchInput;
-      this.add.emit(searchInput);
-      this.searchInput = "";
-    }
+    const searchInput: string = this.searchInput;
+    this.add.emit(searchInput);
+    this.searchInput = "";
   }
 }

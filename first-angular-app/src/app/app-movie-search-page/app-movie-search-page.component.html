@@ -1,8 +1,27 @@
 <h1 class="mat-display-1 app-headline">Films App</h1>
 
-<app-search-input (add)="fetchMoviesTitles($event)"></app-search-input>
+<app-search-input (add)="fetchMovies($event)"></app-search-input>
 
-<p class="mat-body-2 loading-item" *ngIf="isLoading">Loading...</p>
-<mat-list class="films-list">
-  <mat-list-item class="film-item" *ngFor="let movie of resultMovies | async">{{ movie.title }}</mat-list-item>
-</mat-list>
+<p class="loading-item mat-body-2" *ngIf="noInputProvided">Enter something for search.</p>
+
+<ng-container *ngIf="resultMovies | async as moviesInfo; else loading">
+  <ng-container *ngIf="moviesInfo.length; else noMoviesFound">
+    <div class="cards-wrapper">
+      <app-movie-list [moviesInfo]="moviesInfo"></app-movie-list>
+    </div>
+  </ng-container>
+
+  <ng-template #noMoviesFound>
+    <p class="loading-item mat-body-2">
+      There are no movies that matched your query.
+    </p>
+  </ng-template>
+</ng-container>
+
+<ng-template #loading>
+  <ng-container *ngIf="isLoading">
+    <p class="loading-item mat-body-2">
+      Loading ...
+    </p>
+  </ng-container>
+</ng-template>

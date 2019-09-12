@@ -1,0 +1,45 @@
+<div class="movie-card-wrapper">
+  <mat-grid-list class="movie-card" cols="5" rowHeight="30px" [gutterSize]="'5px'">
+    <mat-grid-tile colspan="5" rowspan="2">
+      <h2 class="mat-title movie-title">
+        {{ movie.title }}
+      </h2>
+    </mat-grid-tile>
+
+    <mat-grid-tile colspan="5" rowspan="1">
+      <p class="mat-body-2" *ngIf="movie.releaseDate; else noReleaseDate">
+        {{ movie.releaseDate | date }}
+      </p>
+      <ng-template #noReleaseDate>
+        <p class="mat-body-2">-- -- --</p>
+      </ng-template>
+    </mat-grid-tile>
+
+    <mat-grid-tile colspan="2" rowspan="14">
+      <img class="movie-poster" mat-card-image src="{{ movie.poster | alternativeImage }}" alt="{{ movie.title }}" />
+    </mat-grid-tile>
+
+    <mat-grid-tile colspan="3" rowspan="14">
+      <p class="mat-body-2 movie-overview" *ngIf="movie.overview; else noOverview">
+        {{ movie.overview }}
+      </p>
+      <ng-template #noOverview>
+        <p class="mat-body-2">There is no film overview</p>
+      </ng-template>
+    </mat-grid-tile>
+
+    <div *ngFor="let movieActor of movie.addInfo">
+      <mat-grid-tile class="actor-card" colspan="1" rowspan="7">
+        <div class="actor-card-wrapper">
+          <img
+            class="actor-avatar"
+            mat-card-image
+            src="{{ movieActor.profile_path | alternativeImage }}"
+            alt="{{ movieActor.name }}"
+          />
+          <p class="mat-body-2 actor-name">{{ movieActor.name }}</p>
+        </div>
+      </mat-grid-tile>
+    </div>
+  </mat-grid-list>
+</div>
