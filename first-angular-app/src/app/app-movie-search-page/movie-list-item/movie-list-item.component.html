@@ -19,11 +19,7 @@
       <img
         class="movie-poster"
         mat-card-image
-        [src]="
-          movie.moviePoster
-            ? 'https://image.tmdb.org/t/p/w300/' + movie.moviePoster
-            : 'https://static.thenounproject.com/png/340719-200.png'
-        "
+        src="{{ movie.moviePoster | alternativeImage }}"
         alt="{{ movie.movieTitle }}"
       />
     </mat-grid-tile>
@@ -43,11 +39,7 @@
           <img
             class="actor-avatar"
             mat-card-image
-            [src]="
-              movieActor.profile_path
-                ? 'https://image.tmdb.org/t/p/w300/' + movieActor.profile_path
-                : 'https://static.thenounproject.com/png/340719-200.png'
-            "
+            src="{{ movieActor.profile_path | alternativeImage }}"
             alt="{{ movieActor.name }}"
           />
           <p class="mat-body-2 actor-name">{{ movieActor.name }}</p>
