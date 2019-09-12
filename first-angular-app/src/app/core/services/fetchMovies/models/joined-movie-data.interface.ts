@@ -1,4 +1,4 @@
-import { MovieCastData } from "./movie-cast-data";
+import { MovieCastData } from "./movie-cast-data.interface";
 
 export interface JoinedMovieData {
   movieId: number;

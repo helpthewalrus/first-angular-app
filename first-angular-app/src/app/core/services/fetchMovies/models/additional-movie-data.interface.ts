@@ -1,14 +1,15 @@
-import { MovieCastData } from "./movie-cast-data";
+import { MovieCastData } from "./movie-cast-data.interface";
 import { MovieGenres } from "./movie-genres.interface";
 import { ProductionCompanies } from "./production-companies.interface";
 import { SpokenLanguages } from "./spoken-languages.interface";
+import { MovieCrewData } from "./movie-crew-data.interface";
 
 export interface AdditionalMovieData {
   adult?: boolean;
   backdrop_path?: string;
   belongs_to_collection?: null;
   budget?: number;
-  credits: { cast: Array<MovieCastData>; crew?: Array<any> };
+  credits: { cast: Array<MovieCastData>; crew?: Array<MovieCrewData> };
   genres?: Array<MovieGenres>;
   homepage?: null;
   id: number;

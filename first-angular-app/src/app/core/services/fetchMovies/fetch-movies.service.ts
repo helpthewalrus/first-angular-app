@@ -51,6 +51,7 @@ export class FetchMoviesService {
             }
           },
           (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
+            console.log(moviesInfo);
             if (movies.length && moviesInfo.length) {
               return joinedMovieObject(movies, moviesInfo);
             }

@@ -7,5 +7,6 @@ export {
   JoinedMovieData,
   MovieGenres,
   ProductionCompanies,
-  SpokenLanguages
+  SpokenLanguages,
+  MovieCrewData
 } from "./models/index";
