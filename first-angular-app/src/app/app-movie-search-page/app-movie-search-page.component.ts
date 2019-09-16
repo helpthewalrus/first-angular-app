@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from "@angular/core";
 
-import { Observable } from "rxjs";
-import { tap } from "rxjs/operators";
+import { Observable, interval } from "rxjs";
+import { tap, take, map, publishReplay, refCount } from "rxjs/operators";
 
 import { FetchMoviesService, JoinedMovieData } from "../core/index";
 @Component({
@@ -20,7 +20,9 @@ export class AppMovieSearchPageComponent {
   public noInputProvided: boolean = false;
 
   /** observable which contains array of found movies' data */
-  public resultMovies: Observable<Array<JoinedMovieData>> = null;
+  public resultMovies$: Observable<Array<JoinedMovieData>> = null;
+
+  public currentMovie: string;
 
   constructor(fetchMoviesService: FetchMoviesService) {
     this.fetchMoviesService = fetchMoviesService;
@@ -36,12 +38,25 @@ export class AppMovieSearchPageComponent {
   public fetchMovies(movieName: string): void {
     if (!movieName.trim()) {
       this.noInputProvided = true;
-      this.resultMovies = null;
+      this.resultMovies$ = null;
     } else {
       this.noInputProvided = false;
       this.isLoading = true;
-
-      this.resultMovies = this.fetchMoviesService.fetchMovies(movieName).pipe(tap(() => (this.isLoading = false)));
+      this.currentMovie = movieName;
+      this.resultMovies$ = this.fetchMoviesService.getMoviesStream(movieName).pipe(
+        tap(() => (this.isLoading = false)),
+        publishReplay(1),
+        refCount()
+      );
     }
+  }
+
+  /**
+   * search additional portion of movies on the server and put result into resultMovies variable,
+   * change state of paragraph with loading state
+   */
+  public getNextPage(): void {
+    this.isLoading = true;
+    this.resultMovies$ = this.fetchMoviesService.getNextPage().pipe(tap(() => (this.isLoading = false)));
   }
 }

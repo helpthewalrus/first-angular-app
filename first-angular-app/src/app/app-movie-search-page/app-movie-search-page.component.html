@@ -4,11 +4,9 @@
 
 <p class="loading-item mat-body-2" *ngIf="noInputProvided">Enter something for search.</p>
 
-<ng-container *ngIf="resultMovies | async as moviesInfo; else loading">
+<ng-container *ngIf="resultMovies$ | async as moviesInfo">
   <ng-container *ngIf="moviesInfo.length; else noMoviesFound">
-    <div class="cards-wrapper">
-      <app-movie-list [moviesInfo]="moviesInfo"></app-movie-list>
-    </div>
+    <app-movie-list [moviesInfo]="moviesInfo" class="cards-wrapper"></app-movie-list>
   </ng-container>
 
   <ng-template #noMoviesFound>
@@ -18,10 +16,10 @@
   </ng-template>
 </ng-container>
 
-<ng-template #loading>
-  <ng-container *ngIf="isLoading">
-    <p class="loading-item mat-body-2">
-      Loading ...
-    </p>
-  </ng-container>
-</ng-template>
+<ng-container *ngIf="isLoading">
+  <p class="loading-item mat-body-2">
+    Loading ...
+  </p>
+</ng-container>
+
+<button type="button" class="load-more" *ngIf="resultMovies$ | async" (click)="getNextPage()">Load more</button>
