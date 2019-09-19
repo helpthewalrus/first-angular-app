@@ -16,10 +16,14 @@ export class AppMovieSearchPageComponent {
   /** indicator used for loading data from server */
   public isLoading: boolean = false;
 
-  /** indicator used for reflecting paragraph if no input provided */
+  /**
+   * indicator used for reflecting paragraph if no input provided
+   */
   public noInputProvided: boolean = false;
 
-  /** observable which contains array of found movies' data */
+  /**
+   * observable which contains array of found movies' data
+   */
   public resultMovies$: Observable<Array<JoinedMovieData>> = null;
 
   public currentMovie: string;
@@ -44,6 +48,7 @@ export class AppMovieSearchPageComponent {
       this.isLoading = true;
       this.currentMovie = movieName;
       this.resultMovies$ = this.fetchMoviesService.getMoviesStream(movieName).pipe(
+        tap((data: any) => console.log("from component", data)),
         tap(() => (this.isLoading = false)),
         publishReplay(1),
         refCount()
@@ -57,6 +62,12 @@ export class AppMovieSearchPageComponent {
    */
   public getNextPage(): void {
     this.isLoading = true;
-    this.resultMovies$ = this.fetchMoviesService.getNextPage().pipe(tap(() => (this.isLoading = false)));
+    this.resultMovies$ = this.fetchMoviesService.getNextPage().pipe(
+      tap((data: any) => console.log("next data", data)),
+      tap(() => (this.isLoading = false))
+    );
+    setTimeout(() => {
+      console.log(this.resultMovies$);
+    }, 2000);
   }
 }

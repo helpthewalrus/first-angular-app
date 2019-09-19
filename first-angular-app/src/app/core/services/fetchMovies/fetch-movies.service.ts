@@ -20,6 +20,8 @@ export class FetchMoviesService {
   /** Subject that saves data current page and previous ones */
   public behaviorSubject: BehaviorSubject<number> = new BehaviorSubject(this.currentPage);
 
+  public movieStream$ = this.behaviorSubject.asObservable();
+
   constructor(http: HttpClient) {
     this.http = http;
   }
@@ -30,44 +32,78 @@ export class FetchMoviesService {
    * @param movieName - search input value used to fetch movies from server
    */
   public getMoviesStream(movieName: string): Observable<Array<JoinedMovieData>> {
-    return this.behaviorSubject.asObservable().pipe(
-      switchMap((currPage: number) => {
-        return of(this.searchMoviesParams(movieName, currPage)).pipe(
-          mergeMap((params: HttpParams) => {
-            return this.http
-              .get<FetchedMovies>(constants.BASE_URL, {
-                params
-              })
-              .pipe(
-                map((data: FetchedMovies) => {
-                  if (data.results.length > 0) {
-                    return data.results;
-                  }
-                  return [];
-                }),
-                switchMap(
-                  (movies: Array<MovieData>) => {
-                    if (movies.length > 0) {
-                      return this.parseFetchedMoviesData(movies);
-                    } else {
-                      return of([]);
-                    }
-                  },
-                  (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
-                    if (movies.length && moviesInfo.length) {
-                      return joinedMovieObject(movies, moviesInfo);
-                    }
-                    return [];
-                  }
-                )
-              );
-          })
-        );
+    return this.movieStream$.pipe(
+      map((currPage: number) => {
+        console.log("map", currPage);
+        return currPage;
       }),
-      scan((acc: Array<JoinedMovieData>, curr: Array<JoinedMovieData>) => {
-        acc = [...acc, ...curr];
-        return acc;
-      }, [])
+      switchMap((currPage: number) => {
+        const params: any = this.searchMoviesParams(movieName, currPage);
+        console.log("currPage", currPage, "/n", "params", params);
+        // console.log("currPage", currPage);
+        // return of(this.searchMoviesParams(movieName, currPage)).pipe(
+        //   tap((data: any) => console.log("data", data)),
+        //   mergeMap((params: HttpParams) => {
+        //     console.log("params", params);
+        const fetch: any = this.http.get<FetchedMovies>(constants.BASE_URL, {
+          params
+        });
+        // .pipe(
+        //   map((data: FetchedMovies) => {
+        //     console.log("map FetchedMovies", data);
+        //     if (data.results.length > 0) {
+        //       return data.results;
+        //     }
+        //     return [];
+        //   }),
+        //   switchMap(
+        //     (movies: Array<MovieData>) => {
+        //       if (movies.length > 0) {
+        //         return this.parseFetchedMoviesData(movies);
+        //       } else {
+        //         return of([]);
+        //       }
+        //     },
+        //     (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
+        //       if (movies.length && moviesInfo.length) {
+        //         return joinedMovieObject(movies, moviesInfo);
+        //       }
+        //       return [];
+        //     }
+        //   )
+        // );
+        return fetch;
+        //   })
+        // );
+      }),
+      map((data: FetchedMovies) => {
+        console.log("map FetchedMovies", data);
+        if (data.results.length > 0) {
+          return data.results;
+        }
+        return [];
+      }),
+      switchMap(
+        (movies: Array<MovieData>) => {
+          if (movies.length > 0) {
+            return this.parseFetchedMoviesData(movies);
+          } else {
+            return of([]);
+          }
+        },
+        (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
+          if (movies.length && moviesInfo.length) {
+            return joinedMovieObject(movies, moviesInfo);
+          }
+          return [];
+        }
+      ),
+      // scan((acc: Array<JoinedMovieData>, curr: Array<JoinedMovieData>) => {
+      //   console.log("scan");
+      //   acc = [...acc, ...curr];
+      //   return acc;
+      // }, []),
+      tap((data: any) => console.log("after scan data", data))
     );
   }
 
@@ -111,6 +147,7 @@ export class FetchMoviesService {
   /** method that calls fetching movie data from next page in comparison to current page */
   public getNextPage(): any {
     this.currentPage++;
-    return this.behaviorSubject.next(this.currentPage);
+    this.behaviorSubject.next(this.currentPage);
+    return this.movieStream$;
   }
 }
