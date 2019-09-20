@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 
-import { Observable, forkJoin, of, BehaviorSubject, from } from "rxjs";
-import { map, concatMap, switchMap, tap, mergeMap, scan } from "rxjs/operators";
+import { Observable, forkJoin, of, BehaviorSubject, from, zip } from "rxjs";
+import { map, concatMap, switchMap, tap, mergeMap, scan, catchError, debounceTime } from "rxjs/operators";
 
 import { constants } from "../../constants";
 
@@ -11,15 +11,24 @@ import { joinedMovieObject } from "../../utilities/index";
 
 @Injectable()
 export class FetchMoviesService {
-  /** service with methods to perform HTTP-requests */
+  /**
+   * Service with methods to perform HTTP-requests
+   */
   private http: HttpClient;
 
-  /** variable that contains current page from where data has been fetched */
+  /**
+   * Variable that contains current page from where data has been fetched
+   */
   private currentPage = 1;
 
-  /** Subject that saves data current page and previous ones */
+  /**
+   * Subject that saves data from current page and previous ones
+   */
   public behaviorSubject: BehaviorSubject<number> = new BehaviorSubject(this.currentPage);
 
+  /**
+   * Stream from behaviourSubject to transfer data to the components
+   */
   public movieStream$ = this.behaviorSubject.asObservable();
 
   constructor(http: HttpClient) {
@@ -27,57 +36,17 @@ export class FetchMoviesService {
   }
 
   /**
-   * create stream to fetch movies and movie cast data from server according to user input
+   * Create stream to fetch movies and movie cast data from server according to user input
    *
    * @param movieName - search input value used to fetch movies from server
    */
   public getMoviesStream(movieName: string): Observable<Array<JoinedMovieData>> {
     return this.movieStream$.pipe(
-      map((currPage: number) => {
-        console.log("map", currPage);
-        return currPage;
-      }),
       switchMap((currPage: number) => {
-        const params: any = this.searchMoviesParams(movieName, currPage);
-        console.log("currPage", currPage, "/n", "params", params);
-        // console.log("currPage", currPage);
-        // return of(this.searchMoviesParams(movieName, currPage)).pipe(
-        //   tap((data: any) => console.log("data", data)),
-        //   mergeMap((params: HttpParams) => {
-        //     console.log("params", params);
-        const fetch: any = this.http.get<FetchedMovies>(constants.BASE_URL, {
-          params
-        });
-        // .pipe(
-        //   map((data: FetchedMovies) => {
-        //     console.log("map FetchedMovies", data);
-        //     if (data.results.length > 0) {
-        //       return data.results;
-        //     }
-        //     return [];
-        //   }),
-        //   switchMap(
-        //     (movies: Array<MovieData>) => {
-        //       if (movies.length > 0) {
-        //         return this.parseFetchedMoviesData(movies);
-        //       } else {
-        //         return of([]);
-        //       }
-        //     },
-        //     (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
-        //       if (movies.length && moviesInfo.length) {
-        //         return joinedMovieObject(movies, moviesInfo);
-        //       }
-        //       return [];
-        //     }
-        //   )
-        // );
-        return fetch;
-        //   })
-        // );
+        const params: HttpParams = this.searchMoviesParams(movieName, currPage);
+        return this.http.get<FetchedMovies>(constants.BASE_URL, { params });
       }),
       map((data: FetchedMovies) => {
-        console.log("map FetchedMovies", data);
         if (data.results.length > 0) {
           return data.results;
         }
@@ -98,17 +67,15 @@ export class FetchMoviesService {
           return [];
         }
       ),
-      // scan((acc: Array<JoinedMovieData>, curr: Array<JoinedMovieData>) => {
-      //   console.log("scan");
-      //   acc = [...acc, ...curr];
-      //   return acc;
-      // }, []),
-      tap((data: any) => console.log("after scan data", data))
+      scan((acc: Array<JoinedMovieData>, curr: Array<JoinedMovieData>) => {
+        acc = [...acc, ...curr];
+        return acc;
+      }, [])
     );
   }
 
   /**
-   * emit an array of movies' data in the exact same order as the passed array
+   * Emit an array of movies' data in the exact same order as the passed array
    *
    * @param movies - array with movies' data to extract movie id in order to use in http request
    */
@@ -117,7 +84,7 @@ export class FetchMoviesService {
   }
 
   /**
-   * fetch movie cast info (names, avatars)
+   * Fetch movie cast info (names, avatars)
    *
    * @param movieId - movie id used to fetch data about movie and its cast
    */
@@ -130,6 +97,7 @@ export class FetchMoviesService {
   }
 
   /**
+   * Create HttpParams object to use while fetching data from server
    *
    * @param movieName - search input value used to fetch movies from server
    * @param pageNumber - current page number user wants to fetch data from
@@ -144,8 +112,8 @@ export class FetchMoviesService {
     return params;
   }
 
-  /** method that calls fetching movie data from next page in comparison to current page */
-  public getNextPage(): any {
+  /** Method that calls fetching movie data from the next page with increasing current page number */
+  public getNextPage(): Observable<number> {
     this.currentPage++;
     this.behaviorSubject.next(this.currentPage);
     return this.movieStream$;

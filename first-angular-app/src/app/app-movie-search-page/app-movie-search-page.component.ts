@@ -13,19 +13,22 @@ import { FetchMoviesService, JoinedMovieData } from "../core/index";
 export class AppMovieSearchPageComponent {
   private fetchMoviesService: FetchMoviesService;
 
-  /** indicator used for loading data from server */
+  /** Indicator used for loading data from server */
   public isLoading: boolean = false;
 
   /**
-   * indicator used for reflecting paragraph if no input provided
+   * Indicator used for reflecting paragraph if no input provided
    */
   public noInputProvided: boolean = false;
 
   /**
-   * observable which contains array of found movies' data
+   * Observable which contains array of found movies' data
    */
   public resultMovies$: Observable<Array<JoinedMovieData>> = null;
 
+  /**
+   * Store current searched movie name
+   */
   public currentMovie: string;
 
   constructor(fetchMoviesService: FetchMoviesService) {
@@ -33,7 +36,7 @@ export class AppMovieSearchPageComponent {
   }
 
   /**
-   * search movies on the server and put result into resultMovies variable,
+   * Search movies on the server and put result into resultMovies variable,
    * change state of paragraph with loading state
    * change state of paragraph if no input provided
    *
@@ -48,7 +51,6 @@ export class AppMovieSearchPageComponent {
       this.isLoading = true;
       this.currentMovie = movieName;
       this.resultMovies$ = this.fetchMoviesService.getMoviesStream(movieName).pipe(
-        tap((data: any) => console.log("from component", data)),
         tap(() => (this.isLoading = false)),
         publishReplay(1),
         refCount()
@@ -57,17 +59,11 @@ export class AppMovieSearchPageComponent {
   }
 
   /**
-   * search additional portion of movies on the server and put result into resultMovies variable,
+   * Search additional portion of movies on the server and result is reflected in resultMovies variable,
    * change state of paragraph with loading state
    */
   public getNextPage(): void {
     this.isLoading = true;
-    this.resultMovies$ = this.fetchMoviesService.getNextPage().pipe(
-      tap((data: any) => console.log("next data", data)),
-      tap(() => (this.isLoading = false))
-    );
-    setTimeout(() => {
-      console.log(this.resultMovies$);
-    }, 2000);
+    this.fetchMoviesService.getNextPage();
   }
 }

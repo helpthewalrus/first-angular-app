@@ -7,6 +7,15 @@
 <ng-container *ngIf="resultMovies$ | async as moviesInfo">
   <ng-container *ngIf="moviesInfo.length; else noMoviesFound">
     <app-movie-list [moviesInfo]="moviesInfo" class="cards-wrapper"></app-movie-list>
+    <button
+      mat-raised-button
+      type="button"
+      class="load-more"
+      *ngIf="(resultMovies$ | async) && !isLoading"
+      (click)="getNextPage()"
+    >
+      Load more
+    </button>
   </ng-container>
 
   <ng-template #noMoviesFound>
@@ -21,5 +30,3 @@
     Loading ...
   </p>
 </ng-container>
-
-<button type="button" class="load-more" *ngIf="resultMovies$ | async" (click)="getNextPage()">Load more</button>
