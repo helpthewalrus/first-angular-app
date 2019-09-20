@@ -2,8 +2,6 @@
 
 <app-search-input (add)="fetchMovies($event)"></app-search-input>
 
-<p class="loading-item mat-body-2" *ngIf="noInputProvided">Enter something for search.</p>
-
 <ng-container *ngIf="resultMovies$ | async as moviesInfo">
   <ng-container *ngIf="moviesInfo.length; else noMoviesFound">
     <app-movie-list [moviesInfo]="moviesInfo" class="cards-wrapper"></app-movie-list>
@@ -19,7 +17,7 @@
   </ng-container>
 
   <ng-template #noMoviesFound>
-    <p class="loading-item mat-body-2">
+    <p class="loading-item mat-body-2" *ngIf="!isLoading">
       There are no movies that matched your query.
     </p>
   </ng-template>

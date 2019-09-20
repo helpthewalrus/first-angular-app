@@ -2,7 +2,18 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 
 import { Observable, forkJoin, of, BehaviorSubject, from, zip } from "rxjs";
-import { map, concatMap, switchMap, tap, mergeMap, scan, catchError, debounceTime } from "rxjs/operators";
+import {
+  map,
+  concatMap,
+  switchMap,
+  tap,
+  mergeMap,
+  scan,
+  catchError,
+  debounceTime,
+  filter,
+  distinctUntilChanged
+} from "rxjs/operators";
 
 import { constants } from "../../constants";
 
@@ -19,17 +30,19 @@ export class FetchMoviesService {
   /**
    * Variable that contains current page from where data has been fetched
    */
-  private currentPage = 1;
+  private currentPage: number = 1;
 
   /**
    * Subject that saves data from current page and previous ones
    */
-  public behaviorSubject: BehaviorSubject<number> = new BehaviorSubject(this.currentPage);
+  private behaviorSubject: BehaviorSubject<number> = new BehaviorSubject(this.currentPage);
 
   /**
    * Stream from behaviourSubject to transfer data to the components
    */
   public movieStream$ = this.behaviorSubject.asObservable();
+
+  private querySubject: BehaviorSubject<string> = new BehaviorSubject("");
 
   constructor(http: HttpClient) {
     this.http = http;
@@ -40,38 +53,48 @@ export class FetchMoviesService {
    *
    * @param movieName - search input value used to fetch movies from server
    */
-  public getMoviesStream(movieName: string): Observable<Array<JoinedMovieData>> {
-    return this.movieStream$.pipe(
-      switchMap((currPage: number) => {
-        const params: HttpParams = this.searchMoviesParams(movieName, currPage);
-        return this.http.get<FetchedMovies>(constants.BASE_URL, { params });
-      }),
-      map((data: FetchedMovies) => {
-        if (data.results.length > 0) {
-          return data.results;
-        }
-        return [];
-      }),
-      switchMap(
-        (movies: Array<MovieData>) => {
-          if (movies.length > 0) {
-            return this.parseFetchedMoviesData(movies);
-          } else {
-            return of([]);
-          }
-        },
-        (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
-          if (movies.length && moviesInfo.length) {
-            return joinedMovieObject(movies, moviesInfo);
-          }
-          return [];
-        }
-      ),
-      scan((acc: Array<JoinedMovieData>, curr: Array<JoinedMovieData>) => {
-        acc = [...acc, ...curr];
-        return acc;
-      }, [])
+  public getMoviesStream(): Observable<Array<JoinedMovieData>> {
+    return this.querySubject.asObservable().pipe(
+      distinctUntilChanged(),
+      filter((query: string) => !!query),
+      switchMap((movieName: string) => {
+        return this.movieStream$.pipe(
+          switchMap((currPage: number) => {
+            const params: HttpParams = this.searchMoviesParams(movieName, currPage);
+            return this.http.get<FetchedMovies>(constants.BASE_URL, { params });
+          }),
+          map((data: FetchedMovies) => {
+            if (data.results.length > 0) {
+              return data.results;
+            }
+            return [];
+          }),
+          switchMap(
+            (movies: Array<MovieData>) => {
+              if (movies.length > 0) {
+                return this.parseFetchedMoviesData(movies);
+              } else {
+                return of([]);
+              }
+            },
+            (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) => {
+              if (movies.length && moviesInfo.length) {
+                return joinedMovieObject(movies, moviesInfo);
+              }
+              return [];
+            }
+          ),
+          scan((acc: Array<JoinedMovieData>, curr: Array<JoinedMovieData>) => {
+            acc = [...acc, ...curr];
+            return acc;
+          }, [])
+        );
+      })
     );
+  }
+
+  public fetchMovies(movieName: string): void {
+    this.querySubject.next(movieName);
   }
 
   /**
@@ -113,9 +136,8 @@ export class FetchMoviesService {
   }
 
   /** Method that calls fetching movie data from the next page with increasing current page number */
-  public getNextPage(): Observable<number> {
+  public getNextPage(): void {
     this.currentPage++;
-    this.behaviorSubject.next(this.currentPage);
-    return this.movieStream$;
+    this.behaviorSubject.next(++this.currentPage);
   }
 }

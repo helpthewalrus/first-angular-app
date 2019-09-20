@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, OnInit } from "@angular/core";
 
 import { Observable, interval } from "rxjs";
 import { tap, take, map, publishReplay, refCount } from "rxjs/operators";
@@ -10,7 +10,7 @@ import { FetchMoviesService, JoinedMovieData } from "../core/index";
   styleUrls: ["./app-movie-search-page.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppMovieSearchPageComponent {
+export class AppMovieSearchPageComponent implements OnInit {
   private fetchMoviesService: FetchMoviesService;
 
   /** Indicator used for loading data from server */
@@ -35,6 +35,13 @@ export class AppMovieSearchPageComponent {
     this.fetchMoviesService = fetchMoviesService;
   }
 
+  public ngOnInit(): void {
+    this.resultMovies$ = this.fetchMoviesService.getMoviesStream().pipe(
+      publishReplay(1),
+      refCount()
+    );
+  }
+
   /**
    * Search movies on the server and put result into resultMovies variable,
    * change state of paragraph with loading state
@@ -43,19 +50,9 @@ export class AppMovieSearchPageComponent {
    * @param movieName - input value used to search movies
    */
   public fetchMovies(movieName: string): void {
-    if (!movieName.trim()) {
-      this.noInputProvided = true;
-      this.resultMovies$ = null;
-    } else {
-      this.noInputProvided = false;
-      this.isLoading = true;
-      this.currentMovie = movieName;
-      this.resultMovies$ = this.fetchMoviesService.getMoviesStream(movieName).pipe(
-        tap(() => (this.isLoading = false)),
-        publishReplay(1),
-        refCount()
-      );
-    }
+    this.isLoading = true;
+    this.fetchMoviesService.fetchMovies(movieName);
+    this.isLoading = false;
   }
 
   /**
@@ -65,5 +62,6 @@ export class AppMovieSearchPageComponent {
   public getNextPage(): void {
     this.isLoading = true;
     this.fetchMoviesService.getNextPage();
+    this.isLoading = false;
   }
 }
