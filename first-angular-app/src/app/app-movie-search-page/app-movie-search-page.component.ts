@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnInit } from "@angular/core";
 
 import { Observable, interval } from "rxjs";
-import { tap, take, map, publishReplay, refCount } from "rxjs/operators";
+import { shareReplay } from "rxjs/operators";
 
 import { FetchMoviesService, JoinedMovieData } from "../core/index";
 @Component({
@@ -36,10 +36,7 @@ export class AppMovieSearchPageComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.resultMovies$ = this.fetchMoviesService.getMoviesStream().pipe(
-      publishReplay(1),
-      refCount()
-    );
+    this.resultMovies$ = this.fetchMoviesService.getMoviesStream().pipe(shareReplay(1));
   }
 
   /**
