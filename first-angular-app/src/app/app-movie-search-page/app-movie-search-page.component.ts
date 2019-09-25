@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, OnInit } from "@angular/core";
 
-import { Observable, interval } from "rxjs";
-import { shareReplay } from "rxjs/operators";
+import { Observable } from "rxjs";
+import { shareReplay, tap } from "rxjs/operators";
 
 import { FetchMoviesService, JoinedMovieData } from "../core/index";
 @Component({
@@ -16,6 +16,8 @@ export class AppMovieSearchPageComponent implements OnInit {
   /** Indicator used for loading data from server */
   public isLoading: boolean = false;
 
+  public isMovieListHidden: boolean = false;
+
   /**
    * Indicator used for reflecting paragraph if no input provided
    */
@@ -24,19 +26,28 @@ export class AppMovieSearchPageComponent implements OnInit {
   /**
    * Observable which contains array of found movies' data
    */
-  public resultMovies$: Observable<Array<JoinedMovieData>> = null;
+  public resultMovies$: Observable<Array<JoinedMovieData | string>> = null;
 
   /**
    * Store current searched movie name
    */
   public currentMovie: string;
 
+  /**
+   * Stores boolean value whether user is on last page of searched movie
+   */
+  public isLastPage: boolean = false;
+
   constructor(fetchMoviesService: FetchMoviesService) {
     this.fetchMoviesService = fetchMoviesService;
   }
 
   public ngOnInit(): void {
-    this.resultMovies$ = this.fetchMoviesService.getMoviesStream().pipe(shareReplay(1));
+    this.resultMovies$ = this.fetchMoviesService.getMoviesStream().pipe(
+      shareReplay(1),
+      tap(() => (this.isLoading = false)),
+      tap(() => (this.isMovieListHidden = false))
+    );
   }
 
   /**
@@ -47,9 +58,14 @@ export class AppMovieSearchPageComponent implements OnInit {
    * @param movieName - input value used to search movies
    */
   public fetchMovies(movieName: string): void {
-    this.isLoading = true;
-    this.fetchMoviesService.fetchMovies(movieName);
-    this.isLoading = false;
+    if (movieName.length) {
+      this.isLastPage = false;
+      this.isLoading = true;
+      this.isMovieListHidden = true;
+
+      this.fetchMoviesService.fetchMovies(movieName);
+      this.isLastPage = this.fetchMoviesService.isLastPage;
+    }
   }
 
   /**
@@ -58,7 +74,17 @@ export class AppMovieSearchPageComponent implements OnInit {
    */
   public getNextPage(): void {
     this.isLoading = true;
+
     this.fetchMoviesService.getNextPage();
-    this.isLoading = false;
+    this.isLastPage = this.fetchMoviesService.isLastPage;
+  }
+
+  /**
+   * Checks whether provided value is string or not
+   *
+   * @param value - checked value
+   */
+  public isString(value: any): boolean {
+    return typeof value === "string";
   }
 }

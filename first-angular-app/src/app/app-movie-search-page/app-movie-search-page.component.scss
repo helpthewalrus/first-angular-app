@@ -2,7 +2,7 @@
   text-align: center;
 }
 
-.loading-item {
+.no-movies-found {
   text-align: center;
   font-size: 18px;
 }
@@ -11,12 +11,22 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
+  margin-bottom: 40px;
 }
 
 .load-more {
   display: block;
-  margin: 0 auto;
+  margin: 0 auto 40px;
 
   background-color: #3f51b5;
   color: #ffffff;
+}
+
+.progress-bar {
+  max-width: 150px;
+  margin: 0 auto 40px;
+}
+
+.invisible {
+  display: none;
 }

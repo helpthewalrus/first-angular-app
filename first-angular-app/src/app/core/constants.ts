@@ -5,7 +5,8 @@ const constants: any = {
   BASE_URL: "https://api.tmdb.org/3/search/movie",
   MOVIE_INFO_URL: "https://api.themoviedb.org/3/movie/",
   NO_IMAGE_FOUND: "https://static.thenounproject.com/png/340719-200.png",
-  IMAGE_PART_PATH: "https://image.tmdb.org/t/p/w300/"
+  IMAGE_PART_PATH: "https://image.tmdb.org/t/p/w300/",
+  DEBOUNCE_TIME: 10000
 };
 
 export { constants };

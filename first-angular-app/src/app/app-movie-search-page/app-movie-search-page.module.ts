@@ -6,6 +6,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatListModule } from "@angular/material/list";
 import { MatCardModule } from "@angular/material/card";
 import { MatGridListModule } from "@angular/material/grid-list";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
 
 import { AppMovieSearchPageComponent } from "./app-movie-search-page.component";
 import { SearchInputComponent } from "./search-input/search-input.component";
@@ -23,6 +24,7 @@ import { PipesModule } from "./../shared/pipes/pipes.module";
     MatListModule,
     MatCardModule,
     MatGridListModule,
+    MatProgressBarModule,
     PipesModule
   ],
   providers: [],

@@ -1,11 +1,10 @@
 import { Injectable } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http";
 
-import { Observable, forkJoin, of, BehaviorSubject, timer } from "rxjs";
-import { map, switchMap, scan, filter, distinctUntilChanged, concatAll, debounce } from "rxjs/operators";
+import { Observable, forkJoin, of, BehaviorSubject, timer, throwError } from "rxjs";
+import { map, switchMap, scan, filter, concatAll, debounce, retryWhen, catchError, delayWhen } from "rxjs/operators";
 
 import { constants } from "../../constants";
-
 import { MovieData, FetchedMovies, AdditionalMovieData, JoinedMovieData } from "./models/index";
 import { joinedMovieObject } from "../../utilities/index";
 
@@ -41,6 +40,11 @@ export class FetchMoviesService {
    */
   private totalAmountOfPages: number;
 
+  /**
+   * Stores boolean value whether user is on last page of searched movie
+   */
+  public isLastPage: boolean = false;
+
   constructor(http: HttpClient) {
     this.http = http;
   }
@@ -50,16 +54,17 @@ export class FetchMoviesService {
    *
    * @param movieName - search input value used to fetch movies from server
    */
-  public getMoviesStream(): Observable<Array<JoinedMovieData>> {
+  public getMoviesStream(): Observable<Array<JoinedMovieData | string>> {
     return this.querySubject.asObservable().pipe(
-      distinctUntilChanged(),
-
       filter((query: string) => !!query),
 
       switchMap((movieName: string) => {
         this.pageSubject = new BehaviorSubject(this.currentPage);
+
         return this.pageSubject.asObservable().pipe(
-          debounce(() => timer(this.countDebounce())),
+          debounce(() => {
+            return timer(this.countDebounce());
+          }),
 
           switchMap((currPage: number) => {
             const params: HttpParams = this.searchMoviesParams(movieName, currPage);
@@ -86,29 +91,52 @@ export class FetchMoviesService {
               if (movies.length) {
                 return joinedMovieObject(movieInfo);
               }
-              return [];
+              return ["There are no movies that matched your query."];
             }
           ),
 
+          retryWhen((errors: BehaviorSubject<HttpErrorResponse>) => {
+            return errors.pipe(
+              switchMap((data: HttpErrorResponse) => {
+                if (data.status !== 429) {
+                  return throwError(data);
+                }
+                return of(true);
+              }),
+              delayWhen(() => {
+                return timer(this.countDebounce());
+              })
+            );
+          }),
+
           scan((acc: Array<JoinedMovieData>, curr: Array<JoinedMovieData>) => {
-            acc = [...acc, ...curr];
+            if (typeof curr[0] !== "string") {
+              acc = [...acc, ...curr];
+            }
             return acc;
-          }, [])
+          }, []),
+
+          catchError((errorObject: HttpErrorResponse) => {
+            const message: string = errorObject.error.status_message
+              ? errorObject.error.status_message
+              : "Something went wrong. Try again later.";
+            return of([message]);
+          })
         );
       })
     );
   }
 
   /**
-   * Count debounce time for fetching movies because of requests limit
+   * Count debounce time when fetching another chunk of movies will be available
    */
   public countDebounce(): number {
     const currDate: number = Date.now();
-    if (10000 + this.comparisonDate.getTime() < currDate) {
+    if (constants.DEBOUNCE_TIME + this.comparisonDate.getTime() < currDate) {
       this.comparisonDate = new Date();
       return 0;
     } else {
-      const debouncer: number = this.comparisonDate.getTime() - currDate + 10000;
+      const debouncer: number = this.comparisonDate.getTime() - currDate + constants.DEBOUNCE_TIME;
       this.comparisonDate = new Date();
       return debouncer;
     }
@@ -156,9 +184,12 @@ export class FetchMoviesService {
     return params;
   }
 
-  /** Method that calls fetching movie data from the next page with increasing current page number */
+  /**
+   * Method that calls fetching movie data from the next page with increasing current page number
+   */
   public getNextPage(): void {
     this.currentPage++;
+    this.isLastPage = this.totalAmountOfPages <= this.currentPage ? true : false;
     this.pageSubject.next(this.currentPage);
   }
 
@@ -169,6 +200,7 @@ export class FetchMoviesService {
    */
   public fetchMovies(movieName: string): void {
     this.currentPage = 1;
+    this.isLastPage = false;
     this.querySubject.next(movieName);
   }
 }

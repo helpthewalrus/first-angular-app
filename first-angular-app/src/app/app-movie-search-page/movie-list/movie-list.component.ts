@@ -11,4 +11,17 @@ import { JoinedMovieData } from "src/app/core";
 export class MovieListComponent {
   /** import array of data about found movies */
   @Input() public moviesInfo: Array<JoinedMovieData>;
+
+  /**
+   * Function that keeps track and improves *ngFor performance directive
+   *
+   * @param index - index of the provided element
+   * @param item - element itself
+   */
+  public trackByFunction(index: number, item: JoinedMovieData): number {
+    if (!item) {
+      return null;
+    }
+    return index;
+  }
 }
