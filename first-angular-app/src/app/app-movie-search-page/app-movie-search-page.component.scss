@@ -4,27 +4,27 @@
 
 .no-movies-found {
     text-align: center;
-    font-size: 18px;
+    font-size: 1.8rem;
 }
 
 .cards-wrapper {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
-    margin-bottom: 40px;
+    margin-bottom: 4rem;
 }
 
 .load-more {
     display: block;
-    margin: 0 auto 40px;
+    margin: 0 auto 4rem;
 
     background-color: #3f51b5;
     color: #ffffff;
 }
 
 .progress-bar {
-    max-width: 150px;
-    margin: 0 auto 40px;
+    max-width: 25rem;
+    margin: 0 auto 4rem;
 }
 
 .invisible {

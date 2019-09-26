@@ -18,7 +18,7 @@ export class MovieListComponent {
      * @param index - index of the provided element
      * @param item - element itself
      */
-    public trackByFunction(index: number, item: JoinedMovieData): number {
-        return item ? index : null;
+    public trackByFunction(id: number, item: JoinedMovieData): number {
+        return item ? item.id : null;
     }
 }

@@ -1,1 +1,5 @@
-<app-movie-list-item *ngFor="let movie of moviesInfo; trackBy: trackByFunction" [movie]="movie"></app-movie-list-item>
+<app-movie-list-item
+    class="app-movie-list-item"
+    *ngFor="let movie of moviesInfo; trackBy: trackByFunction"
+    [movie]="movie"
+></app-movie-list-item>

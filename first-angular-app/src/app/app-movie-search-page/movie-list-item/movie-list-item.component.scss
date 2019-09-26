@@ -1,35 +1,37 @@
-.movie-card-wrapper {
-    margin-bottom: 20px;
-    &:empty {
-        display: none;
-    }
+.movie-card-wrapper:empty {
+    display: none;
 }
 
 .movie-card {
     box-sizing: border-box;
     min-height: 100%;
 
-    min-width: 600px;
-    margin-bottom: 20px;
-    padding: 10px;
+    min-width: 60rem;
+    padding: 1rem;
 
     background-color: #eeeeee;
-    border: 1px solid #cccccc;
-    border-radius: 5px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    border: 0.1rem solid #cccccc;
+    border-radius: 0.5rem;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.19), 0 0.6rem 0.6rem rgba(0, 0, 0, 0.23);
 
     .movie-title {
-        margin: 50px 0 0;
+        margin: 5rem 2rem 0;
+        text-align: center;
     }
 
     .movie-poster,
     .actor-avatar {
-        max-width: 200px;
-        border-radius: 3px;
+        max-width: 20rem;
+        border-radius: 0.3rem;
     }
 
     .movie-overview {
-        max-width: 20rem;
+        display: -webkit-box;
+        max-width: 30rem;
+        margin: 0 auto;
+        -webkit-line-clamp: 12;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
         text-overflow: ellipsis;
     }
 
@@ -41,7 +43,7 @@
     }
 
     .actor-avatar {
-        max-width: 100px;
+        max-width: 10rem;
     }
 
     .actor-name {
