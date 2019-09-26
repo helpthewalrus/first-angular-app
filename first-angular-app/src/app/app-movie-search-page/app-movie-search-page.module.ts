@@ -15,19 +15,19 @@ import { MovieListItemComponent } from "./movie-list-item/movie-list-item.compon
 import { PipesModule } from "./../shared/pipes/pipes.module";
 
 @NgModule({
-  declarations: [AppMovieSearchPageComponent, SearchInputComponent, MovieListComponent, MovieListItemComponent],
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatInputModule,
-    MatButtonModule,
-    MatListModule,
-    MatCardModule,
-    MatGridListModule,
-    MatProgressBarModule,
-    PipesModule
-  ],
-  providers: [],
-  exports: [AppMovieSearchPageComponent]
+    declarations: [AppMovieSearchPageComponent, SearchInputComponent, MovieListComponent, MovieListItemComponent],
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatInputModule,
+        MatButtonModule,
+        MatListModule,
+        MatCardModule,
+        MatGridListModule,
+        MatProgressBarModule,
+        PipesModule
+    ],
+    providers: [],
+    exports: [AppMovieSearchPageComponent]
 })
 export class AppMovieSearchPageModule {}

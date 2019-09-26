@@ -1,4 +1,4 @@
 export interface MovieGenres {
-  id: number;
-  name: string;
+    id: number;
+    name: string;
 }
