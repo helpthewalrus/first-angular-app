@@ -2,26 +2,26 @@
 
 <app-search-input (add)="fetchMovies($event)"></app-search-input>
 
-<p class="loading-item mat-body-2" *ngIf="noInputProvided">Enter something for search.</p>
+<ng-container *ngIf="resultMovies$ | async as moviesInfo">
+    <ng-container *ngIf="moviesInfo.length && !isMovieListHidden && !isString(moviesInfo[0]); else noMoviesFound">
+        <app-movie-list [moviesInfo]="moviesInfo" class="cards-wrapper"></app-movie-list>
+        <button
+            mat-raised-button
+            type="button"
+            class="load-more"
+            *ngIf="!isLoading"
+            (click)="getNextPage()"
+            [class.invisible]="isLastPage"
+        >
+            Load more
+        </button>
+    </ng-container>
 
-<ng-container *ngIf="resultMovies | async as moviesInfo; else loading">
-  <ng-container *ngIf="moviesInfo.length; else noMoviesFound">
-    <div class="cards-wrapper">
-      <app-movie-list [moviesInfo]="moviesInfo"></app-movie-list>
-    </div>
-  </ng-container>
-
-  <ng-template #noMoviesFound>
-    <p class="loading-item mat-body-2">
-      There are no movies that matched your query.
-    </p>
-  </ng-template>
+    <ng-template #noMoviesFound>
+        <p class="no-movies-found mat-body-2" *ngIf="!isLoading">
+            {{ moviesInfo[0] }}
+        </p>
+    </ng-template>
 </ng-container>
 
-<ng-template #loading>
-  <ng-container *ngIf="isLoading">
-    <p class="loading-item mat-body-2">
-      Loading ...
-    </p>
-  </ng-container>
-</ng-template>
+<mat-progress-bar *ngIf="isLoading && !isLastPage" mode="indeterminate" class="progress-bar"></mat-progress-bar>

@@ -4,5 +4,13 @@
   "useTabs": false,
   "tabWidth": 2,
   "semi": true,
-  "bracketSpacing": true
+  "bracketSpacing": true,
+  "overrides": [
+    {
+      "files": ["*.html", "*.js", "*.ts", "*.json", "*.css", "*.scss"],
+      "options": {
+        "tabWidth": 4
+      }
+    }
+  ]
 }
