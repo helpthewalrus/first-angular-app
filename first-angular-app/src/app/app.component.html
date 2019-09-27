@@ -1,1 +1,17 @@
-<app-app-movie-search-page></app-app-movie-search-page>
+<mat-toolbar color="primary" class="navbar">
+    <h1 class="mat-display-1">
+        <a routerLink="/" class="navbar-list-link">Movie Search App</a>
+    </h1>
+    <ul class="navbar-list">
+        <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="navbar-list-item">
+            <a routerLink="/" mat-button class="navbar-list-link">Search</a>
+        </li>
+        <li routerLinkActive="active" class="navbar-list-item">
+            <a routerLink="/films-to-watch" mat-button class="navbar-list-link">Watch later</a>
+        </li>
+    </ul>
+</mat-toolbar>
+
+<div class="main-wrapper">
+    <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,27 @@
+.main-wrapper {
+    padding: 2rem;
+}
+
+.navbar {
+    justify-content: space-between;
+    margin-bottom: 10rem;
+}
+
+.navbar-list {
+    display: flex;
+    list-style: none;
+}
+
+.navbar-list-item {
+    padding-right: 1rem;
+    color: #ffffff;
+}
+
+.navbar-list-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.active {
+    color: #ff00b3;
+}
