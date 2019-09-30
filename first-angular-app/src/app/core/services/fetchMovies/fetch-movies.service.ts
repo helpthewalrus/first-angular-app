@@ -84,12 +84,12 @@ export class FetchMoviesService {
                         (movies: Array<MovieData>, movieInfo: AdditionalMovieData) =>
                             movies.length > 0 ? joinedMovieObject(movieInfo) : [constants.NO_MOVIES_FOUND]
                     ),
-                    tap(() => (this.comparisonDate = new Date())),
                     retryWhen((errors: BehaviorSubject<HttpErrorResponse>) => {
                         return errors.pipe(
                             switchMap((data: HttpErrorResponse) => (data.status !== 429 ? throwError(data) : of(true)))
                         );
                     }),
+                    tap(() => (this.comparisonDate = new Date())),
                     scan((acc: Array<JoinedMovieData>, current: Array<JoinedMovieData>) => {
                         if (typeof current[0] !== "string") {
                             acc = [...acc, ...current];

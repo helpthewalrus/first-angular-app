@@ -2,7 +2,6 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 
-import { CoreModule } from "./../core/core.module";
 import { SharedModule } from "../shared/shared.module";
 
 import { AppMovieSearchPageComponent } from "./app-movie-search-page.component";
@@ -12,7 +11,7 @@ import { MovieListItemComponent } from "./movie-list-item/movie-list-item.compon
 
 @NgModule({
     declarations: [AppMovieSearchPageComponent, SearchInputComponent, MovieListComponent, MovieListItemComponent],
-    imports: [CommonModule, FormsModule, SharedModule, CoreModule],
+    imports: [CommonModule, FormsModule, SharedModule],
     providers: [],
     exports: [AppMovieSearchPageComponent]
 })

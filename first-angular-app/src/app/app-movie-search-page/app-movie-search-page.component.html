@@ -1,5 +1,3 @@
-<h1 class="mat-display-1 app-headline">Films App</h1>
-
 <app-search-input (add)="fetchMovies($event)"></app-search-input>
 
 <ng-container *ngIf="resultMovies$ | async as moviesInfo">
