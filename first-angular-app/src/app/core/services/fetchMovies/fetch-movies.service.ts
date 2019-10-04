@@ -190,4 +190,8 @@ export class FetchMoviesService {
 
         this.querySubject.next(movieName);
     }
+
+    public resetSearchQuery(): void {
+        this.querySubject.next(undefined);
+    }
 }

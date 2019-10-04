@@ -1,16 +1,26 @@
-import { Component, ChangeDetectionStrategy, OnInit } from "@angular/core";
+import { Component, ChangeDetectionStrategy, OnInit, OnDestroy } from "@angular/core";
 
+import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { shareReplay, tap } from "rxjs/operators";
 
 import { FetchMoviesService, JoinedMovieData, JoinedMovieDataCheckbox } from "../core/index";
+import { State } from "../core/store/reducers";
+
+// CHANGE IMPORTS
+import { AddMovieToWatchList, RemoveMovieToWatchList } from "../core/store/films-to-watch/films-to-watch.actions";
 @Component({
     selector: "app-app-movie-search-page",
     templateUrl: "./app-movie-search-page.component.html",
     styleUrls: ["./app-movie-search-page.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppMovieSearchPageComponent implements OnInit {
+export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
+    /**
+     * Ngrx Store of the app
+     */
+    private store: Store<State>;
+
     /**
      * Service for fetching data about movies according to user input
      */
@@ -21,6 +31,9 @@ export class AppMovieSearchPageComponent implements OnInit {
      */
     public isLoading: boolean = false;
 
+    /**
+     * Indicator used if user starts searching movie different from the previous search
+     */
     public isMovieListHidden: boolean = false;
 
     /**
@@ -43,8 +56,9 @@ export class AppMovieSearchPageComponent implements OnInit {
      */
     public isLastPage: boolean = false;
 
-    constructor(fetchMoviesService: FetchMoviesService) {
+    constructor(fetchMoviesService: FetchMoviesService, store: Store<State>) {
         this.fetchMoviesService = fetchMoviesService;
+        this.store = store;
     }
 
     public ngOnInit(): void {
@@ -53,6 +67,10 @@ export class AppMovieSearchPageComponent implements OnInit {
             tap(() => (this.isLoading = false)),
             tap(() => (this.isMovieListHidden = false))
         );
+    }
+
+    public ngOnDestroy(): void {
+        this.fetchMoviesService.resetSearchQuery();
     }
 
     /**
@@ -94,10 +112,14 @@ export class AppMovieSearchPageComponent implements OnInit {
     }
 
     /**
-     * when checkbox "add this film to my watchlist" value changes
+     * When checkbox "add this film to my watchlist" value changes
      * than get data with checkbox state and info about movie
      */
     public onAddToWatchList($event: JoinedMovieDataCheckbox): void {
-        console.log($event);
+        if ($event.isAddedToWatchList) {
+            this.store.dispatch(new AddMovieToWatchList($event));
+        } else {
+            this.store.dispatch(new RemoveMovieToWatchList($event));
+        }
     }
 }
