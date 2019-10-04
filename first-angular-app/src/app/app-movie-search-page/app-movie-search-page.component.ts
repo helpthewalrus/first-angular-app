@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, OnInit } from "@angular/core";
 import { Observable } from "rxjs";
 import { shareReplay, tap } from "rxjs/operators";
 
-import { FetchMoviesService, JoinedMovieData } from "../core/index";
+import { FetchMoviesService, JoinedMovieData, JoinedMovieDataCheckbox } from "../core/index";
 @Component({
     selector: "app-app-movie-search-page",
     templateUrl: "./app-movie-search-page.component.html",
@@ -11,9 +11,14 @@ import { FetchMoviesService, JoinedMovieData } from "../core/index";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppMovieSearchPageComponent implements OnInit {
+    /**
+     * Service for fetching data about movies according to user input
+     */
     private fetchMoviesService: FetchMoviesService;
 
-    /** Indicator used for loading data from server */
+    /**
+     * Indicator used for loading data from server
+     */
     public isLoading: boolean = false;
 
     public isMovieListHidden: boolean = false;
@@ -84,7 +89,15 @@ export class AppMovieSearchPageComponent implements OnInit {
      *
      * @param value - checked value
      */
-    public isString(value: any): boolean {
+    public isString(value: JoinedMovieData | string): boolean {
         return typeof value === "string";
+    }
+
+    /**
+     * when checkbox "add this film to my watchlist" value changes
+     * than get data with checkbox state and info about movie
+     */
+    public onAddToWatchList($event: JoinedMovieDataCheckbox): void {
+        console.log($event);
     }
 }

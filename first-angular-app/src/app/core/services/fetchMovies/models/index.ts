@@ -7,3 +7,4 @@ export { MovieGenres } from "./movie-genres.interface";
 export { ProductionCompanies } from "./production-companies.interface";
 export { SpokenLanguages } from "./spoken-languages.interface";
 export { MovieCrewData } from "./movie-crew-data.interface";
+export { JoinedMovieDataCheckbox } from "./joined-movie-data-checkbox.interface";

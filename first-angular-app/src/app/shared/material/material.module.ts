@@ -7,7 +7,8 @@ import {
     MatCardModule,
     MatGridListModule,
     MatProgressBarModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatCheckboxModule
 } from "@angular/material";
 
 const material: Array<MaterialModule> = [
@@ -17,7 +18,8 @@ const material: Array<MaterialModule> = [
     MatCardModule,
     MatGridListModule,
     MatProgressBarModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatCheckboxModule
 ];
 @NgModule({
     imports: [material],

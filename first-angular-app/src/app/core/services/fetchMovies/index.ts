@@ -8,5 +8,6 @@ export {
     MovieGenres,
     ProductionCompanies,
     SpokenLanguages,
-    MovieCrewData
+    MovieCrewData,
+    JoinedMovieDataCheckbox
 } from "./models/index";
