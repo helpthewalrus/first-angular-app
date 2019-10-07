@@ -7,8 +7,7 @@ import { shareReplay, tap } from "rxjs/operators";
 import { FetchMoviesService, JoinedMovieData, JoinedMovieDataCheckbox } from "../core/index";
 import { State } from "../core/store/reducers";
 
-// CHANGE IMPORTS
-import { AddMovieToWatchList, RemoveMovieToWatchList } from "../core/store/films-to-watch/films-to-watch.actions";
+import { FilmsToWatchActions } from "../core/store/films-to-watch/index";
 @Component({
     selector: "app-app-movie-search-page",
     templateUrl: "./app-movie-search-page.component.html",
@@ -52,7 +51,7 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
     public currentMovie: string;
 
     /**
-     * Stores boolean value whether user is on last page of searched movie
+     * Stores boolean value whether user is on the last page of searched movie
      */
     public isLastPage: boolean = false;
 
@@ -74,9 +73,7 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Search movies on the server and put result into resultMovies variable,
-     * change state of paragraph with loading state
-     * change state of paragraph if no input provided
+     * Search movies on the server and put result into resultMovies$ variable
      *
      * @param movieName - input value used to search movies
      */
@@ -91,8 +88,7 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Search additional portion of movies on the server and result is reflected in resultMovies variable,
-     * change state of paragraph with loading state
+     * Search additional portion of movies on the server and result is reflected in resultMovies$ variable
      */
     public getNextPage(): void {
         if (!this.isLastPage) {
@@ -113,13 +109,13 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
 
     /**
      * When checkbox "add this film to my watchlist" value changes
-     * than get data with checkbox state and info about movie
+     * than dispatch data with checkbox state and info about movie
      */
     public onAddToWatchList($event: JoinedMovieDataCheckbox): void {
         if ($event.isAddedToWatchList) {
-            this.store.dispatch(new AddMovieToWatchList($event));
+            this.store.dispatch(new FilmsToWatchActions.AddMovieToWatchList($event));
         } else {
-            this.store.dispatch(new RemoveMovieToWatchList($event));
+            this.store.dispatch(new FilmsToWatchActions.RemoveMovieFromWatchList($event));
         }
     }
 }

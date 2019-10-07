@@ -1,5 +1,3 @@
-import { Action } from "@ngrx/store";
-
 import { JoinedMovieDataCheckbox } from "../../index";
 import { FilmsToWatchActionTypes, FilmsToWatchActions } from "./films-to-watch.actions";
 

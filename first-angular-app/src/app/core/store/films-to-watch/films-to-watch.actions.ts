@@ -17,14 +17,10 @@ export class AddMovieToWatchList implements Action {
     constructor(public payload: JoinedMovieDataCheckbox) {}
 }
 
-export class RemoveMovieToWatchList implements Action {
+export class RemoveMovieFromWatchList implements Action {
     public readonly type = FilmsToWatchActionTypes.RemoveMovieToWatchList;
 
     constructor(public payload: JoinedMovieDataCheckbox) {}
 }
 
-/**
- * Export a type alias of all actions in this action group
- * so that reducers can easily compose action types
- */
-export type FilmsToWatchActions = AddMovieToWatchList | RemoveMovieToWatchList;
+export type FilmsToWatchActions = AddMovieToWatchList | RemoveMovieFromWatchList;

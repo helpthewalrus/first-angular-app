@@ -10,12 +10,12 @@ import { JoinedMovieData, JoinedMovieDataCheckbox } from "../../core";
 })
 export class MovieListComponent {
     /**
-     * import array of data about found movies
+     * Import array of data about found movies
      */
     @Input() public moviesInfo: Array<JoinedMovieData>;
 
     /**
-     * emitted data with checkbox "add this film to my watchlist" state and info about movie
+     * Emitted data with checkbox "add this film to my watchlist" state and info about movie
      */
     @Output() public movieInfoWithCheckboxState: EventEmitter<JoinedMovieDataCheckbox> = new EventEmitter();
 
@@ -30,7 +30,7 @@ export class MovieListComponent {
     }
 
     /**
-     * when checkbox value changes than emit data with checkbox state and info about movie
+     * When checkbox value changes than emit data with checkbox state and info about movie
      */
     public onAddToWatchList($event: boolean, movie: JoinedMovieData): void {
         const result: JoinedMovieDataCheckbox = { joinedMovieData: movie, isAddedToWatchList: $event };
