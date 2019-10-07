@@ -1,7 +1,5 @@
-import { JoinedMovieDataCheckbox } from "../../index";
+import { JoinedMovieDataCheckbox } from "../../../core/index";
 import { FilmsToWatchActionTypes, FilmsToWatchActions } from "./films-to-watch.actions";
-
-export const filmsToWatchFeatureKey: string = "filmsToWatch";
 
 export interface FilmsToWatchState {
     filmsToWatch: Array<JoinedMovieDataCheckbox>;

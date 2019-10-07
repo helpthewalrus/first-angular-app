@@ -1,6 +1,6 @@
 import { Action } from "@ngrx/store";
 
-import { JoinedMovieDataCheckbox } from "../../index";
+import { JoinedMovieDataCheckbox } from "../../../core/index";
 
 /**
  * AddMovieToWatchList - stands for adding movie to watch list action
@@ -12,15 +12,23 @@ export enum FilmsToWatchActionTypes {
 }
 
 export class AddMovieToWatchList implements Action {
+    public payload: JoinedMovieDataCheckbox;
+
     public readonly type = FilmsToWatchActionTypes.AddMovieToWatchList;
 
-    constructor(public payload: JoinedMovieDataCheckbox) {}
+    constructor(payload: JoinedMovieDataCheckbox) {
+        this.payload = payload;
+    }
 }
 
 export class RemoveMovieFromWatchList implements Action {
+    public payload: JoinedMovieDataCheckbox;
+
     public readonly type = FilmsToWatchActionTypes.RemoveMovieToWatchList;
 
-    constructor(public payload: JoinedMovieDataCheckbox) {}
+    constructor(payload: JoinedMovieDataCheckbox) {
+        this.payload = payload;
+    }
 }
 
 export type FilmsToWatchActions = AddMovieToWatchList | RemoveMovieFromWatchList;

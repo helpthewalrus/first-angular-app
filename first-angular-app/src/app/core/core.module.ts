@@ -1,10 +1,12 @@
 import { NgModule } from "@angular/core";
 
-import { ServicesModule } from "./services/services.module";
 import { StoreModule } from "@ngrx/store";
-import { reducers, metaReducers } from "./store/reducers";
 import { StoreDevtoolsModule } from "@ngrx/store-devtools";
+
 import { environment } from "../../environments/environment";
+import { reducers, metaReducers } from "./store/reducers";
+import { ServicesModule } from "./services/index";
+import { FilmsToWatchStateModule } from "./store-facades/index";
 
 @NgModule({
     declarations: [],
@@ -12,12 +14,9 @@ import { environment } from "../../environments/environment";
         ServicesModule,
         StoreModule.forRoot(reducers, {
             metaReducers
-            // runtimeChecks: {
-            //     strictStateImmutability: true,
-            //     strictActionImmutability: true
-            // }
         }),
-        !environment.production ? StoreDevtoolsModule.instrument() : []
+        !environment.production ? StoreDevtoolsModule.instrument() : [],
+        FilmsToWatchStateModule
     ],
     exports: [ServicesModule]
 })

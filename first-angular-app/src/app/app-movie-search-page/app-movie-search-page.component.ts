@@ -1,13 +1,12 @@
 import { Component, ChangeDetectionStrategy, OnInit, OnDestroy } from "@angular/core";
 
-import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { shareReplay, tap } from "rxjs/operators";
 
-import { FetchMoviesService, JoinedMovieData, JoinedMovieDataCheckbox } from "../core/index";
-import { State } from "../core/store/reducers";
+import { isString } from "lodash";
 
-import { FilmsToWatchActions } from "../core/store/films-to-watch/index";
+import { FetchMoviesService, JoinedMovieData, JoinedMovieDataCheckbox, FilmsToWatchFacade } from "../core/index";
+
 @Component({
     selector: "app-app-movie-search-page",
     templateUrl: "./app-movie-search-page.component.html",
@@ -16,9 +15,9 @@ import { FilmsToWatchActions } from "../core/store/films-to-watch/index";
 })
 export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
     /**
-     * Ngrx Store of the app
+     * Ngrx store facade of the app
      */
-    private store: Store<State>;
+    public filmsToWatchFacade: FilmsToWatchFacade;
 
     /**
      * Service for fetching data about movies according to user input
@@ -55,9 +54,14 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
      */
     public isLastPage: boolean = false;
 
-    constructor(fetchMoviesService: FetchMoviesService, store: Store<State>) {
+    /**
+     * Lodash function that checks whether provided value is string or not
+     */
+    public isStringLodash = isString;
+
+    constructor(fetchMoviesService: FetchMoviesService, filmsToWatchFacade: FilmsToWatchFacade) {
         this.fetchMoviesService = fetchMoviesService;
-        this.store = store;
+        this.filmsToWatchFacade = filmsToWatchFacade;
     }
 
     public ngOnInit(): void {
@@ -99,23 +103,16 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Checks whether provided value is string or not
-     *
-     * @param value - checked value
-     */
-    public isString(value: JoinedMovieData | string): boolean {
-        return typeof value === "string";
-    }
-
-    /**
      * When checkbox "add this film to my watchlist" value changes
      * than dispatch data with checkbox state and info about movie
+     *
+     * @param $event - data about "added to watchlist" movie
      */
     public onAddToWatchList($event: JoinedMovieDataCheckbox): void {
         if ($event.isAddedToWatchList) {
-            this.store.dispatch(new FilmsToWatchActions.AddMovieToWatchList($event));
+            this.filmsToWatchFacade.addMovieToWatchList($event);
         } else {
-            this.store.dispatch(new FilmsToWatchActions.RemoveMovieFromWatchList($event));
+            this.filmsToWatchFacade.removeMovieFromWatchList($event);
         }
     }
 }

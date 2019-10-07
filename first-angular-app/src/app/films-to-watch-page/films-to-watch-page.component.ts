@@ -1,11 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 
-import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 
-import { JoinedMovieDataCheckbox } from "../core/index";
-import { State } from "../core/store/reducers";
-import { FilmsToWatchSelectors } from "../core/store/films-to-watch/index";
+import { FilmsToWatchFacade, JoinedMovieDataCheckbox } from "../core/index";
 
 @Component({
     selector: "app-films-to-watch-page",
@@ -13,6 +10,9 @@ import { FilmsToWatchSelectors } from "../core/store/films-to-watch/index";
     styleUrls: ["./films-to-watch-page.component.scss"]
 })
 export class FilmsToWatchPageComponent implements OnInit {
+    /**
+     * Indicator whether film overview is visible/hidden
+     */
     public panelOpenState = false;
 
     /**
@@ -21,15 +21,15 @@ export class FilmsToWatchPageComponent implements OnInit {
     public filmsToWatch$: Observable<Array<JoinedMovieDataCheckbox>>;
 
     /**
-     * Ngrx Store of the app
+     * Ngrx store facade of the app
      */
-    private store: Store<State>;
+    public filmsToWatchFacade: FilmsToWatchFacade;
 
-    constructor(store: Store<State>) {
-        this.store = store;
+    constructor(filmsToWatchFacade: FilmsToWatchFacade) {
+        this.filmsToWatchFacade = filmsToWatchFacade;
     }
 
     public ngOnInit(): void {
-        this.filmsToWatch$ = this.store.select(FilmsToWatchSelectors.selectFilmsToWatchList);
+        this.filmsToWatch$ = this.filmsToWatchFacade.filmsToWatchList$;
     }
 }

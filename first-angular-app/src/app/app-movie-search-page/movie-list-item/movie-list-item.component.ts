@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from "@angular/core";
 
-import { JoinedMovieData } from "src/app/core";
+import { JoinedMovieData } from "../../core/index";
 
 @Component({
     selector: "app-movie-list-item",

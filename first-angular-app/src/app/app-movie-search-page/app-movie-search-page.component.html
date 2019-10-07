@@ -1,7 +1,7 @@
 <app-search-input (add)="fetchMovies($event)"></app-search-input>
 
 <ng-container *ngIf="resultMovies$ | async as moviesInfo">
-    <ng-container *ngIf="moviesInfo.length && !isMovieListHidden && !isString(moviesInfo[0]); else noMoviesFound">
+    <ng-container *ngIf="moviesInfo.length && !isMovieListHidden && !isStringLodash(moviesInfo[0]); else noMoviesFound">
         <app-movie-list
             [moviesInfo]="moviesInfo"
             class="cards-wrapper"
