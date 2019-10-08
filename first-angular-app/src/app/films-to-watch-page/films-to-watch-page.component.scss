@@ -1,3 +1,13 @@
 .central-wrapper {
     text-align: center;
+
+    .movie-to-watch-wrapper {
+        max-width: 100rem;
+        margin: 0 auto;
+    }
+
+    .title-description-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
 }

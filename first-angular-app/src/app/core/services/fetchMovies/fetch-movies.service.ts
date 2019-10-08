@@ -2,18 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http";
 
 import { Observable, forkJoin, of, BehaviorSubject, timer, throwError } from "rxjs";
-import {
-    map,
-    switchMap,
-    scan,
-    filter,
-    concatAll,
-    debounce,
-    retryWhen,
-    catchError,
-    delayWhen,
-    tap
-} from "rxjs/operators";
+import { map, switchMap, scan, filter, concatAll, debounce, retryWhen, catchError, tap } from "rxjs/operators";
 
 import { constants } from "../../constants";
 import { MovieData, FetchedMovies, AdditionalMovieData, JoinedMovieData } from "./models/index";
@@ -189,5 +178,12 @@ export class FetchMoviesService {
         this.isLastPage = false;
 
         this.querySubject.next(movieName);
+    }
+
+    /**
+     * When user leaves search movies page than reset received data
+     */
+    public resetSearchQuery(): void {
+        this.querySubject.next(undefined);
     }
 }

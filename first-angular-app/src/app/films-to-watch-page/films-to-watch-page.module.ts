@@ -1,3 +1,4 @@
+import { FormsModule } from "@angular/forms";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
@@ -7,7 +8,7 @@ import { FilmsToWatchPageComponent } from "./films-to-watch-page.component";
 
 @NgModule({
     declarations: [FilmsToWatchPageComponent],
-    imports: [SharedModule, CommonModule],
+    imports: [SharedModule, CommonModule, FormsModule],
     providers: [],
     exports: [FilmsToWatchPageComponent]
 })

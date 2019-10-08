@@ -1,21 +1,37 @@
-import { Component, ChangeDetectionStrategy, OnInit } from "@angular/core";
+import { Component, ChangeDetectionStrategy, OnInit, OnDestroy } from "@angular/core";
 
 import { Observable } from "rxjs";
 import { shareReplay, tap } from "rxjs/operators";
 
-import { FetchMoviesService, JoinedMovieData } from "../core/index";
+import * as isString from "lodash/isString";
+
+import { FetchMoviesService, JoinedMovieData, JoinedMovieDataCheckbox, FilmsToWatchFacade } from "../core/index";
+
 @Component({
     selector: "app-app-movie-search-page",
     templateUrl: "./app-movie-search-page.component.html",
     styleUrls: ["./app-movie-search-page.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppMovieSearchPageComponent implements OnInit {
+export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
+    /**
+     * Ngrx store facade of the app
+     */
+    public filmsToWatchFacade: FilmsToWatchFacade;
+
+    /**
+     * Service for fetching data about movies according to user input
+     */
     private fetchMoviesService: FetchMoviesService;
 
-    /** Indicator used for loading data from server */
+    /**
+     * Indicator used for loading data from server
+     */
     public isLoading: boolean = false;
 
+    /**
+     * Indicator used if user starts searching movie different from the previous search
+     */
     public isMovieListHidden: boolean = false;
 
     /**
@@ -34,12 +50,18 @@ export class AppMovieSearchPageComponent implements OnInit {
     public currentMovie: string;
 
     /**
-     * Stores boolean value whether user is on last page of searched movie
+     * Stores boolean value whether user is on the last page of searched movie
      */
     public isLastPage: boolean = false;
 
-    constructor(fetchMoviesService: FetchMoviesService) {
+    /**
+     * Lodash function that checks whether provided value is string or not
+     */
+    public isStringLodash = isString;
+
+    constructor(fetchMoviesService: FetchMoviesService, filmsToWatchFacade: FilmsToWatchFacade) {
         this.fetchMoviesService = fetchMoviesService;
+        this.filmsToWatchFacade = filmsToWatchFacade;
     }
 
     public ngOnInit(): void {
@@ -50,10 +72,12 @@ export class AppMovieSearchPageComponent implements OnInit {
         );
     }
 
+    public ngOnDestroy(): void {
+        this.fetchMoviesService.resetSearchQuery();
+    }
+
     /**
-     * Search movies on the server and put result into resultMovies variable,
-     * change state of paragraph with loading state
-     * change state of paragraph if no input provided
+     * Search movies on the server and put result into resultMovies$ variable
      *
      * @param movieName - input value used to search movies
      */
@@ -68,8 +92,7 @@ export class AppMovieSearchPageComponent implements OnInit {
     }
 
     /**
-     * Search additional portion of movies on the server and result is reflected in resultMovies variable,
-     * change state of paragraph with loading state
+     * Search additional portion of movies on the server and result is reflected in resultMovies$ variable
      */
     public getNextPage(): void {
         if (!this.isLastPage) {
@@ -80,11 +103,16 @@ export class AppMovieSearchPageComponent implements OnInit {
     }
 
     /**
-     * Checks whether provided value is string or not
+     * When checkbox "add this film to my watchlist" value changes
+     * than dispatch data with checkbox state and info about movie
      *
-     * @param value - checked value
+     * @param $event - data about "added to watchlist" movie
      */
-    public isString(value: any): boolean {
-        return typeof value === "string";
+    public onAddToWatchList($event: JoinedMovieDataCheckbox): void {
+        if ($event.isAddedToWatchList) {
+            this.filmsToWatchFacade.addMovieToWatchList($event);
+        } else {
+            this.filmsToWatchFacade.removeMovieFromWatchList($event);
+        }
     }
 }
