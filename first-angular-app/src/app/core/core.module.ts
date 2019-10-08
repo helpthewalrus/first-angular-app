@@ -6,7 +6,7 @@ import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { environment } from "../../environments/environment";
 import { reducers, metaReducers } from "./store/reducers";
 import { ServicesModule } from "./services/index";
-import { FilmsToWatchStateModule } from "./store-facades/index";
+import { StoreFacadeModule } from "./store-facades/index";
 
 @NgModule({
     declarations: [],
@@ -16,7 +16,7 @@ import { FilmsToWatchStateModule } from "./store-facades/index";
             metaReducers
         }),
         !environment.production ? StoreDevtoolsModule.instrument() : [],
-        FilmsToWatchStateModule
+        StoreFacadeModule
     ],
     exports: [ServicesModule]
 })

@@ -1,11 +1,8 @@
 import { ActionReducer, ActionReducerMap, createFeatureSelector, createSelector, MetaReducer } from "@ngrx/store";
 
 import { environment } from "../../../environments/environment";
-import { FilmsToWatchState, filmsToWatchReducer } from "./films-to-watch/index";
-
-export interface State {
-    filmsToWatch: FilmsToWatchState;
-}
+import { filmsToWatchReducer } from "./films-to-watch/index";
+import { State } from "./store.model";
 
 export const reducers: ActionReducerMap<State> = {
     filmsToWatch: filmsToWatchReducer

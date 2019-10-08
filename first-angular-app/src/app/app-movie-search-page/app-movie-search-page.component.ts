@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, OnInit, OnDestroy } from "@angular/
 import { Observable } from "rxjs";
 import { shareReplay, tap } from "rxjs/operators";
 
-import { isString } from "lodash";
+import * as isString from "lodash/isString";
 
 import { FetchMoviesService, JoinedMovieData, JoinedMovieDataCheckbox, FilmsToWatchFacade } from "../core/index";
 

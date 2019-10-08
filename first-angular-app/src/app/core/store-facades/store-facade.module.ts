@@ -14,4 +14,4 @@ import { FilmsToWatchFacade } from "./films-to-watch/index";
     ],
     providers: [FilmsToWatchFacade]
 })
-export class FilmsToWatchStateModule {}
+export class StoreFacadeModule {}

@@ -1,6 +1,6 @@
 import { Action } from "@ngrx/store";
 
-import { JoinedMovieDataCheckbox } from "../../../core/index";
+import { JoinedMovieDataCheckbox } from "../../services/index";
 
 /**
  * AddMovieToWatchList - stands for adding movie to watch list action
