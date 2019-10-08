@@ -5,7 +5,7 @@ import { Store } from "@ngrx/store";
 
 import { JoinedMovieDataCheckbox } from "../../services/index";
 import { FilmsToWatchSelectors, FilmsToWatchActions } from "../../store/index";
-import { State } from "../../store/store.model";
+import { State } from "../../store/index";
 
 @Injectable()
 export class FilmsToWatchFacade {
