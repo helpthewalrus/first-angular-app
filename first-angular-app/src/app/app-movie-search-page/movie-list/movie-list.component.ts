@@ -33,7 +33,7 @@ export class MovieListComponent {
      * When checkbox value changes than emit data with checkbox state and info about movie
      */
     public onAddToWatchList($event: boolean, movie: JoinedMovieData): void {
-        const result: JoinedMovieDataCheckbox = { joinedMovieData: movie, isAddedToWatchList: $event };
+        const result: JoinedMovieDataCheckbox = { ...movie, isAddedToWatchList: $event };
         this.movieInfoWithCheckboxState.emit(result);
     }
 }

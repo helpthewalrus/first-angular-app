@@ -17,7 +17,7 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
     /**
      * Ngrx store facade of the app
      */
-    public filmsToWatchFacade: FilmsToWatchFacade;
+    private filmsToWatchFacade: FilmsToWatchFacade;
 
     /**
      * Service for fetching data about movies according to user input
@@ -35,19 +35,9 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
     public isMovieListHidden: boolean = false;
 
     /**
-     * Indicator used for reflecting paragraph if no input provided
-     */
-    public noInputProvided: boolean = false;
-
-    /**
      * Observable which contains array of found movies' data
      */
-    public resultMovies$: Observable<Array<JoinedMovieData | string>> = null;
-
-    /**
-     * Store current searched movie name
-     */
-    public currentMovie: string;
+    public resultMovies$: Observable<Array<JoinedMovieDataCheckbox | string>> = null;
 
     /**
      * Stores boolean value whether user is on the last page of searched movie

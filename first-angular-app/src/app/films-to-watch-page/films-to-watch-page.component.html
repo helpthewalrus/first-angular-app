@@ -11,17 +11,17 @@
             <mat-expansion-panel-header>
                 <div class="title-description-wrapper">
                     <mat-panel-title>
-                        {{ filmToWatch.joinedMovieData.title }}
+                        {{ filmToWatch.title }}
                     </mat-panel-title>
-                    <mat-panel-description *ngIf="filmToWatch.joinedMovieData.releaseDate; else noReleaseDate">
-                        {{ filmToWatch.joinedMovieData.releaseDate | date: "yyyy" }}
+                    <mat-panel-description *ngIf="filmToWatch.releaseDate; else noReleaseDate">
+                        {{ filmToWatch.releaseDate | date: "yyyy" }}
                     </mat-panel-description>
                     <ng-template #noReleaseDate>
                         <mat-panel-description> -- -- -- </mat-panel-description>
                     </ng-template>
                 </div>
             </mat-expansion-panel-header>
-            <p>{{ filmToWatch.joinedMovieData.overview }}</p>
+            <p>{{ filmToWatch.overview }}</p>
         </mat-expansion-panel>
     </mat-accordion>
 
