@@ -20,7 +20,7 @@ export function filmsToWatchReducer(
             return {
                 ...state,
                 filmsToWatch: state.filmsToWatch.filter((filmToWatch: JoinedMovieDataCheckbox) => {
-                    return filmToWatch.joinedMovieData.id !== action.payload.joinedMovieData.id;
+                    return filmToWatch.id !== action.payload.id;
                 })
             };
         default:

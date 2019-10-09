@@ -1,6 +1,11 @@
-import { JoinedMovieData } from "./joined-movie-data.interface";
+import { MovieCastData } from "./movie-cast-data.interface";
 
 export interface JoinedMovieDataCheckbox {
     isAddedToWatchList: boolean;
-    joinedMovieData: JoinedMovieData;
+    id: number;
+    overview: string;
+    poster: string;
+    releaseDate: string;
+    title: string;
+    addInfo: Array<MovieCastData>;
 }

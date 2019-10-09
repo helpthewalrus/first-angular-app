@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 
 import { Observable } from "rxjs";
+import { shareReplay } from "rxjs/operators";
 
 import { FilmsToWatchFacade, JoinedMovieDataCheckbox } from "../core/index";
 
@@ -11,6 +12,11 @@ import { FilmsToWatchFacade, JoinedMovieDataCheckbox } from "../core/index";
 })
 export class FilmsToWatchPageComponent implements OnInit {
     /**
+     * Ngrx store facade of the app
+     */
+    private filmsToWatchFacade: FilmsToWatchFacade;
+
+    /**
      * Indicator whether film overview is visible/hidden
      */
     public panelOpenState = false;
@@ -20,16 +26,11 @@ export class FilmsToWatchPageComponent implements OnInit {
      */
     public filmsToWatch$: Observable<Array<JoinedMovieDataCheckbox>>;
 
-    /**
-     * Ngrx store facade of the app
-     */
-    public filmsToWatchFacade: FilmsToWatchFacade;
-
     constructor(filmsToWatchFacade: FilmsToWatchFacade) {
         this.filmsToWatchFacade = filmsToWatchFacade;
     }
 
     public ngOnInit(): void {
-        this.filmsToWatch$ = this.filmsToWatchFacade.filmsToWatchList$;
+        this.filmsToWatch$ = this.filmsToWatchFacade.filmsToWatchList$.pipe(shareReplay(1));
     }
 }

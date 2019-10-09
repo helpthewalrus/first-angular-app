@@ -1,8 +1,7 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from "@angular/core";
-
 import { MatCheckboxChange } from "@angular/material";
 
-import { JoinedMovieData } from "../../core/index";
+import { JoinedMovieDataCheckbox } from "../../core/index";
 
 @Component({
     selector: "app-movie-list-item",
@@ -14,18 +13,17 @@ export class MovieListItemComponent {
     /**
      * Import data for rendering about one of the found movies
      */
-    @Input() public movie: JoinedMovieData;
+    @Input() public movie: JoinedMovieDataCheckbox;
 
     /**
      * Emitted data with checkbox "add this film to my watchlist" value
      */
-    @Output() public isAddedToWatchList: EventEmitter<boolean> = new EventEmitter();
+    @Output() public movieAddedToWatchList: EventEmitter<JoinedMovieDataCheckbox> = new EventEmitter();
 
     /**
      * When checkbox value changes than emit checkbox value
      */
-    public onChangeCheckbox($event: MatCheckboxChange): void {
-        const checked: boolean = $event.checked;
-        this.isAddedToWatchList.emit(checked);
+    public onChangeCheckbox(): void {
+        this.movieAddedToWatchList.emit(this.movie);
     }
 }
