@@ -48,10 +48,7 @@
         </div>
 
         <mat-grid-tile colspan="5" rowspan="2">
-            <mat-checkbox
-                class="add-film-checkbox"
-                (change)="onChangeCheckbox($event)"
-                [(ngModel)]="movie.isAddedToWatchList"
+            <mat-checkbox class="add-film-checkbox" (change)="onChangeCheckbox()" [(ngModel)]="movie.isAddedToWatchList"
                 >Add this film to my watchlist</mat-checkbox
             >
         </mat-grid-tile>

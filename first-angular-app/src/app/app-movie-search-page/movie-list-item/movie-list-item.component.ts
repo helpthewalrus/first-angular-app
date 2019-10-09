@@ -18,13 +18,12 @@ export class MovieListItemComponent {
     /**
      * Emitted data with checkbox "add this film to my watchlist" value
      */
-    @Output() public isAddedToWatchList: EventEmitter<boolean> = new EventEmitter();
+    @Output() public movieAddedToWatchList: EventEmitter<JoinedMovieDataCheckbox> = new EventEmitter();
 
     /**
      * When checkbox value changes than emit checkbox value
      */
-    public onChangeCheckbox($event: MatCheckboxChange): void {
-        const checked: boolean = $event.checked;
-        this.isAddedToWatchList.emit(checked);
+    public onChangeCheckbox(): void {
+        this.movieAddedToWatchList.emit(this.movie);
     }
 }

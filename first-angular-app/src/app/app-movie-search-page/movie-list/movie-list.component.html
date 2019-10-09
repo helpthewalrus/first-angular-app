@@ -2,5 +2,5 @@
     class="app-movie-list-item"
     *ngFor="let movie of moviesInfo; trackBy: trackByFunction"
     [movie]="movie"
-    (isAddedToWatchList)="onAddToWatchList($event, movie)"
+    (movieAddedToWatchList)="onAddToWatchList($event)"
 ></app-movie-list-item>

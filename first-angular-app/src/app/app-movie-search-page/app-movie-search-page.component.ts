@@ -5,7 +5,7 @@ import { shareReplay, tap } from "rxjs/operators";
 
 import * as isString from "lodash/isString";
 
-import { FetchMoviesService, JoinedMovieData, JoinedMovieDataCheckbox, FilmsToWatchFacade } from "../core/index";
+import { FetchMoviesService, JoinedMovieDataCheckbox, FilmsToWatchFacade } from "../core/index";
 
 @Component({
     selector: "app-app-movie-search-page",

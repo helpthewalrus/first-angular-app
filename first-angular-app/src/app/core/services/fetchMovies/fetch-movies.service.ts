@@ -2,7 +2,9 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams, HttpErrorResponse } from "@angular/common/http";
 
 import { Observable, forkJoin, of, BehaviorSubject, timer, throwError } from "rxjs";
-import { map, switchMap, scan, filter, concatAll, debounce, retryWhen, catchError, tap, zip } from "rxjs/operators";
+import { map, switchMap, scan, filter, debounce, retryWhen, catchError, tap } from "rxjs/operators";
+
+import * as isString from "lodash/isString";
 
 import { constants } from "../../constants";
 import {
@@ -14,7 +16,6 @@ import {
 } from "./models/index";
 import { joinedMovieObject } from "../../utilities/index";
 import { FilmsToWatchFacade } from "../../store-facades/index";
-import * as isString from "lodash/isString";
 
 @Injectable()
 export class FetchMoviesService {
@@ -82,11 +83,14 @@ export class FetchMoviesService {
                             map((data: FetchedMovies) => (data.results.length > 0 ? data.results : []))
                         );
                     }),
-                    switchMap(
-                        (movies: Array<MovieData>) =>
-                            movies.length > 0 ? this.parseFetchedMoviesData(movies) : of([]),
-                        (movies: Array<MovieData>, moviesInfo: Array<AdditionalMovieData>) =>
-                            movies.length > 0 ? joinedMovieObject(moviesInfo) : [constants.NO_MOVIES_FOUND]
+                    switchMap((movies: Array<MovieData>) =>
+                        movies.length <= 0
+                            ? of([])
+                            : this.parseFetchedMoviesData(movies).pipe(
+                                  map((moviesInfo: Array<AdditionalMovieData>) =>
+                                      movies.length > 0 ? joinedMovieObject(moviesInfo) : [constants.NO_MOVIES_FOUND]
+                                  )
+                              )
                     ),
                     retryWhen((errors: BehaviorSubject<HttpErrorResponse>) => {
                         return errors.pipe(
@@ -101,13 +105,16 @@ export class FetchMoviesService {
                         }
                         return current;
                     }, []),
-                    switchMap(
-                        (movies: Array<JoinedMovieData>) =>
-                            !isString(movies[0]) ? this.getChosenMoviesObservable() : of([]),
-                        (movies: Array<JoinedMovieData>, filmsToWatchList: Array<JoinedMovieDataCheckbox>) =>
-                            !isString(movies[0])
-                                ? this.addCheckboxToFoundMovies(movies, filmsToWatchList)
-                                : [constants.NO_MOVIES_FOUND]
+                    switchMap((movies: Array<JoinedMovieData>) =>
+                        movies.length <= 0
+                            ? of([])
+                            : this.getChosenMoviesObservable().pipe(
+                                  map((filmsToWatchList: Array<JoinedMovieDataCheckbox>) =>
+                                      !isString(movies[0])
+                                          ? this.addCheckboxToFoundMovies(movies, filmsToWatchList)
+                                          : [constants.NO_MOVIES_FOUND]
+                                  )
+                              )
                     ),
                     catchError((errorObject: HttpErrorResponse) => {
                         const message: string =
@@ -119,6 +126,38 @@ export class FetchMoviesService {
                 );
             })
         );
+    }
+
+    /**
+     * Method that calls fetching movie data from the next page with increasing current page number
+     */
+    public getNextPage(): void {
+        this.currentPage++;
+        if (this.totalAmountOfPages >= this.currentPage) {
+            this.pageSubject.next(this.currentPage);
+        } else {
+            this.isLastPage = true;
+        }
+    }
+
+    /**
+     * Method that calls fetching new movie provided by user
+     *
+     * @param movieName - input value used to search movies
+     */
+    public fetchMovies(movieName: string): void {
+        this.currentPage = 1;
+        this.totalAmountOfPages = undefined;
+        this.isLastPage = false;
+
+        this.querySubject.next(movieName);
+    }
+
+    /**
+     * When user leaves search movies page than reset received data
+     */
+    public resetSearchQuery(): void {
+        this.querySubject.next(undefined);
     }
 
     /**
@@ -208,37 +247,5 @@ export class FetchMoviesService {
         params = params.append("page", `${pageNumber}`);
         params = params.append("include_adult", "false");
         return params;
-    }
-
-    /**
-     * Method that calls fetching movie data from the next page with increasing current page number
-     */
-    public getNextPage(): void {
-        this.currentPage++;
-        if (this.totalAmountOfPages >= this.currentPage) {
-            this.pageSubject.next(this.currentPage);
-        } else {
-            this.isLastPage = true;
-        }
-    }
-
-    /**
-     * Method that calls fetching new movie provided by user
-     *
-     * @param movieName - input value used to search movies
-     */
-    public fetchMovies(movieName: string): void {
-        this.currentPage = 1;
-        this.totalAmountOfPages = undefined;
-        this.isLastPage = false;
-
-        this.querySubject.next(movieName);
-    }
-
-    /**
-     * When user leaves search movies page than reset received data
-     */
-    public resetSearchQuery(): void {
-        this.querySubject.next(undefined);
     }
 }
