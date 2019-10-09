@@ -178,19 +178,15 @@ export class FetchMoviesService {
         filmsToWatchList: Array<JoinedMovieDataCheckbox>
     ): Array<JoinedMovieDataCheckbox> {
         return movies.map((movie: JoinedMovieData) => {
-            if (filmsToWatchList.length > 0) {
-                if (filmsToWatchList.find((item: JoinedMovieDataCheckbox) => item.id === movie.id)) {
-                    return {
-                        ...movie,
-                        isAddedToWatchList: true
-                    };
-                }
-            }
-            const obj: JoinedMovieDataCheckbox = {
+            const isAddedToWatchList: boolean = filmsToWatchList.find(
+                (item: JoinedMovieDataCheckbox) => item.id === movie.id
+            )
+                ? true
+                : false;
+            return {
                 ...movie,
-                isAddedToWatchList: false
+                isAddedToWatchList
             };
-            return obj;
         });
     }
 
