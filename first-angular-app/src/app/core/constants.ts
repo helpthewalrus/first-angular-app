@@ -6,7 +6,8 @@ const constants: any = {
     IMAGE_PART_PATH: "https://image.tmdb.org/t/p/w300/",
     DEBOUNCE_TIME: 10000,
     NO_MOVIES_FOUND: "There are no movies that matched your query.",
-    UNKNOWN_ERROR_MESSAGE: "Something went wrong. Try again later."
+    UNKNOWN_ERROR_MESSAGE: "Something went wrong. Try again later.",
+    MOVIES_FROM_LOCALSTORAGE: "__moviesToWatch"
 };
 
 export { constants };

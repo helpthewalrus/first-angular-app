@@ -14,14 +14,19 @@ export function filmsToWatchReducer(
         case FilmsToWatchActionTypes.AddMovieToWatchList:
             return {
                 ...state,
-                filmsToWatch: [...state.filmsToWatch, action.payload]
+                filmsToWatch: [action.payload, ...state.filmsToWatch]
             };
-        case FilmsToWatchActionTypes.RemoveMovieToWatchList:
+        case FilmsToWatchActionTypes.RemoveMovieFromWatchList:
             return {
                 ...state,
                 filmsToWatch: state.filmsToWatch.filter((filmToWatch: JoinedMovieDataCheckbox) => {
                     return filmToWatch.id !== action.payload.id;
                 })
+            };
+        case FilmsToWatchActionTypes.GetMoviesToWatchSuccess:
+            return {
+                ...state,
+                filmsToWatch: [...action.payload, ...state.filmsToWatch]
             };
         default:
             return state;
