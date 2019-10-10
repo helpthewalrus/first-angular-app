@@ -7,47 +7,61 @@ import { tap, map } from "rxjs/operators";
 import { FilmsToWatchActions } from "../store/films-to-watch/index";
 import { JoinedMovieDataCheckbox } from "../services/index";
 import { CommonActions } from "../store/common/index";
-import { constants } from "../constants";
+import { ModifyLocalStorageService } from "../services/index";
 
 @Injectable()
 export class FilmsToWatchEffects {
+    private actions$: Actions;
+
+    private modifyLocalStorageService: ModifyLocalStorageService;
+
+    private moviesFromStorageKey = "__moviesToWatch";
+
     @Effect({ dispatch: false })
     public storeMoviesToWatch$: Observable<
         FilmsToWatchActions.AddMovieToWatchList | FilmsToWatchActions.RemoveMovieFromWatchList
-    > = this.actions$.pipe(
-        ofType(
-            FilmsToWatchActions.FilmsToWatchActionTypes.AddMovieToWatchList,
-            FilmsToWatchActions.FilmsToWatchActionTypes.RemoveMovieFromWatchList
-        ),
-        tap((movieToWatch: FilmsToWatchActions.AddMovieToWatchList | FilmsToWatchActions.RemoveMovieFromWatchList) => {
-            const storedMoviesToWatch: string = localStorage.getItem(constants.MOVIES_FROM_LOCALSTORAGE);
-
-            const moviesToWatch: Array<JoinedMovieDataCheckbox> = storedMoviesToWatch
-                ? JSON.parse(storedMoviesToWatch)
-                : [];
-
-            const newMoviesToWatch: Array<JoinedMovieDataCheckbox> =
-                movieToWatch.type === FilmsToWatchActions.FilmsToWatchActionTypes.AddMovieToWatchList
-                    ? [movieToWatch.payload, ...moviesToWatch]
-                    : moviesToWatch.filter((movie: JoinedMovieDataCheckbox) => movie.id !== movieToWatch.payload.id);
-
-            localStorage.setItem(constants.MOVIES_FROM_LOCALSTORAGE, JSON.stringify(newMoviesToWatch));
-        })
-    );
+    >;
 
     @Effect()
-    public getMoviesToWatch$: Observable<FilmsToWatchActions.GetMoviesToWatchSuccess> = this.actions$.pipe(
-        ofType(CommonActions.CommonActionTypes.Initialize),
-        map(() => {
-            const storedMoviesToWatch: string = localStorage.getItem(constants.MOVIES_FROM_LOCALSTORAGE);
+    public getMoviesToWatch$: Observable<FilmsToWatchActions.GetMoviesToWatchSuccess>;
 
-            const moviesToWatch: Array<JoinedMovieDataCheckbox> = storedMoviesToWatch
-                ? JSON.parse(storedMoviesToWatch)
-                : [];
+    constructor(actions: Actions, modifyLocalStorageService: ModifyLocalStorageService) {
+        this.actions$ = actions;
 
-            return new FilmsToWatchActions.GetMoviesToWatchSuccess(moviesToWatch);
-        })
-    );
+        this.modifyLocalStorageService = modifyLocalStorageService;
 
-    constructor(private actions$: Actions) {}
+        this.storeMoviesToWatch$ = this.actions$.pipe(
+            ofType(
+                FilmsToWatchActions.FilmsToWatchActionTypes.AddMovieToWatchList,
+                FilmsToWatchActions.FilmsToWatchActionTypes.RemoveMovieFromWatchList
+            ),
+            tap(
+                (
+                    movieToWatch: FilmsToWatchActions.AddMovieToWatchList | FilmsToWatchActions.RemoveMovieFromWatchList
+                ) => {
+                    const moviesToWatch: Array<JoinedMovieDataCheckbox> =
+                        this.modifyLocalStorageService.getInfoFromLocalStorage(this.moviesFromStorageKey) || [];
+
+                    const newMoviesToWatch: Array<JoinedMovieDataCheckbox> =
+                        movieToWatch.type === FilmsToWatchActions.FilmsToWatchActionTypes.AddMovieToWatchList
+                            ? [movieToWatch.payload, ...moviesToWatch]
+                            : moviesToWatch.filter(
+                                  (movie: JoinedMovieDataCheckbox) => movie.id !== movieToWatch.payload.id
+                              );
+
+                    this.modifyLocalStorageService.setInfoToLocalStorage(this.moviesFromStorageKey, newMoviesToWatch);
+                }
+            )
+        );
+
+        this.getMoviesToWatch$ = this.actions$.pipe(
+            ofType(CommonActions.CommonActionTypes.Initialize),
+            map(() => {
+                const moviesToWatch: Array<JoinedMovieDataCheckbox> =
+                    this.modifyLocalStorageService.getInfoFromLocalStorage(this.moviesFromStorageKey) || [];
+
+                return new FilmsToWatchActions.GetMoviesToWatchSuccess(moviesToWatch);
+            })
+        );
+    }
 }
