@@ -18,7 +18,6 @@ export class ModifyLocalStorageService {
      * @param value - stores the data connected with provided key
      */
     public setInfoToLocalStorage(key: string, value: any): void {
-        console.log(value);
         window.localStorage.setItem(key, JSON.stringify(value));
     }
 }
