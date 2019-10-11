@@ -5,8 +5,7 @@ import { Observable } from "rxjs";
 import { tap, map } from "rxjs/operators";
 
 import { FilmsToWatchActions, CommonActions } from "../store/index";
-import { JoinedMovieDataCheckbox } from "../services/index";
-import { ModifyLocalStorageService } from "../services/index";
+import { JoinedMovieDataCheckbox, ModifyLocalStorageService } from "../services/index";
 
 @Injectable()
 export class FilmsToWatchEffects {
