@@ -1,3 +1,5 @@
-import * as FilmsToWatchEffects from "./films-to-watch.effects";
+import { Type } from "@angular/core";
 
-export { FilmsToWatchEffects };
+import { FilmsToWatchEffects } from "./films-to-watch.effects";
+
+export const effects: Array<Type<any>> = [FilmsToWatchEffects];

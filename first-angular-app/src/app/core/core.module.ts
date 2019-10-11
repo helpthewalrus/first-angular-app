@@ -8,7 +8,7 @@ import { environment } from "../../environments/environment";
 import { reducers, metaReducers } from "./store/reducers";
 import { ServicesModule } from "./services/index";
 import { StoreFacadeModule } from "./store-facades/index";
-import { FilmsToWatchEffects } from "./effects/films-to-watch.effects";
+import { effects } from "./effects/index";
 import { State } from "./store/index";
 import { CommonActions } from "./store/common/index";
 
@@ -21,14 +21,14 @@ import { CommonActions } from "./store/common/index";
         }),
         !environment.production ? StoreDevtoolsModule.instrument() : [],
         StoreFacadeModule,
-        EffectsModule.forRoot([FilmsToWatchEffects])
+        EffectsModule.forRoot(effects)
     ],
     providers: [
         {
             provide: APP_INITIALIZER,
             useFactory: (store: Store<State>): (() => void) => {
                 return (): void => {
-                    store.dispatch(new CommonActions.INITIALIZE());
+                    store.dispatch(new CommonActions.Initialize());
                 };
             },
             multi: true,

@@ -7,8 +7,8 @@ export enum CommonActionTypes {
     Initialize = "[Common] INITIALIZE"
 }
 
-export class INITIALIZE implements Action {
+export class Initialize implements Action {
     public readonly type = CommonActionTypes.Initialize;
 }
 
-export type CommonActions = INITIALIZE;
+export type CommonActions = Initialize;
