@@ -2,11 +2,12 @@ import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
-import { FetchMoviesService } from "./fetchMovies";
+import { FetchMoviesService } from "./fetchMovies/index";
+import { ModifyLocalStorageService } from "./modifyLocalStorage/index";
 
 @NgModule({
     declarations: [],
     imports: [CommonModule, HttpClientModule],
-    providers: [FetchMoviesService]
+    providers: [FetchMoviesService, ModifyLocalStorageService]
 })
 export class ServicesModule {}
