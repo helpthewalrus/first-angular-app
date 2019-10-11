@@ -11,10 +11,6 @@ describe("joinedMovieObject", () => {
     it("should return JoinedMovieData array if source array contains AdditionalMovieData", () => {
         const inputObject: Array<AdditionalMovieData> = [
             {
-                adult: false,
-                backdrop_path: "test_backdrop_path",
-                belongs_to_collection: null,
-                budget: 100,
                 credits: {
                     cast: [
                         {
@@ -30,28 +26,11 @@ describe("joinedMovieObject", () => {
                     ],
                     crew: []
                 },
-                genres: [{ id: 18, name: "Drama" }],
-                homepage: null,
                 id: 600,
-                imdb_id: "test_imdb_id",
-                original_language: "test_original_language",
-                original_title: "test_original_title",
                 overview: "test_overview",
-                popularity: 700,
                 poster_path: "test_poster_path",
-                production_companies: [
-                    { id: 4, logo_path: "test_logo_path", name: "test_name", origin_country: "test_origin_country" }
-                ],
                 release_date: "1997-11-18",
-                revenue: 800,
-                runtime: 900,
-                spoken_languages: [],
-                status: "test_status",
-                tagline: "test_tagline",
-                title: "test_title",
-                video: false,
-                vote_average: 1000,
-                vote_count: 1100
+                title: "test_title"
             }
         ];
 
