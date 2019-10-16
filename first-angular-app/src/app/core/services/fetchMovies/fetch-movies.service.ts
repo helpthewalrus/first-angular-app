@@ -14,7 +14,7 @@ import {
     JoinedMovieData,
     JoinedMovieDataCheckbox
 } from "./models/index";
-import { joinedMovieObject } from "../../utilities/index";
+import * as Utils from "../../utilities/index";
 import { FilmsToWatchFacade } from "../../store-facades/index";
 
 @Injectable()
@@ -88,7 +88,9 @@ export class FetchMoviesService {
                             ? of([])
                             : this.parseFetchedMoviesData(movies).pipe(
                                   map((moviesInfo: Array<AdditionalMovieData>) =>
-                                      movies.length > 0 ? joinedMovieObject(moviesInfo) : [constants.NO_MOVIES_FOUND]
+                                      movies.length > 0
+                                          ? Utils.joinedMovieObject(moviesInfo)
+                                          : [constants.NO_MOVIES_FOUND]
                                   )
                               )
                     ),
