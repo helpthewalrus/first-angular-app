@@ -228,7 +228,7 @@ export class FetchMoviesService {
         params = params.append("api_key", constants.API_KEY);
         params = params.append("append_to_response", "credits");
 
-        return this.http.get(`${constants.MOVIE_INFO_URL}${movieId}`, { params });
+        return this.http.get(`${constants.MOVIE_INFO_URL}${movieId}`, { params }) as Observable<AdditionalMovieData>;
     }
 
     /**

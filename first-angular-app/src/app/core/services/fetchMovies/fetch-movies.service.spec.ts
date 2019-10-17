@@ -1,24 +1,78 @@
-import { TestBed, getTestBed } from "@angular/core/testing";
+import { TestBed } from "@angular/core/testing";
 
 import { FetchMoviesService } from "./fetch-movies.service";
-import { JoinedMovieDataCheckbox } from "./models";
+import { JoinedMovieDataCheckbox, FetchedMovies, AdditionalMovieData } from "./models/index";
 import { FilmsToWatchFacade } from "../../store-facades";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { TestScheduler } from "rxjs/testing";
 import { RunHelpers } from "rxjs/internal/testing/TestScheduler";
 import * as Utils from "../../utilities/index";
+import { constants } from "../../constants";
 
-describe("RestProvider", () => {
+fdescribe("FetchMoviesService", () => {
     let fetchMoviesService: FetchMoviesService;
     let testScheduler: TestScheduler;
 
     const httpMock: jasmine.SpyObj<HttpClient> = jasmine.createSpyObj("HttpClient", ["get"]);
-    const filmsToWatchListSubj: BehaviorSubject<Array<JoinedMovieDataCheckbox>> = new BehaviorSubject(undefined);
+
     const filmsToWatchFacadeMock: jasmine.SpyObj<FilmsToWatchFacade> = jasmine.createSpyObj("FilmsToWatchFacade", [
         "filmsToWatchList$"
     ]);
+    const filmsToWatchListSubj: BehaviorSubject<Array<JoinedMovieDataCheckbox>> = new BehaviorSubject(undefined);
     filmsToWatchFacadeMock.filmsToWatchList$ = filmsToWatchListSubj.asObservable();
+
+    const fetchedMovies: FetchedMovies = {
+        page: 1,
+        total_results: 1,
+        total_pages: 1,
+        results: [
+            {
+                id: 597,
+                overview: "overview",
+                poster_path: "poster",
+                release_date: "2010-01-01",
+                title: "Titanic"
+            }
+        ]
+    };
+
+    const additionalInfo: AdditionalMovieData = {
+        credits: {
+            cast: [
+                {
+                    id: 100,
+                    name: "John Doe",
+                    order: 200,
+                    profile_path: "test_profile_path"
+                }
+            ]
+        },
+        id: 597,
+        overview: "overview",
+        poster_path: "poster",
+        release_date: "2010-01-01",
+        title: "Titanic"
+    };
+
+    const moviesResult: Array<JoinedMovieDataCheckbox> = [
+        {
+            isAddedToWatchList: false,
+            id: 597,
+            overview: "overview",
+            poster: "poster",
+            releaseDate: "2010-01-01",
+            title: "Titanic",
+            addInfo: [
+                {
+                    id: 100,
+                    name: "John Doe",
+                    order: 200,
+                    profile_path: "test_profile_path"
+                }
+            ]
+        }
+    ];
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -32,60 +86,24 @@ describe("RestProvider", () => {
         fetchMoviesService = TestBed.get(FetchMoviesService);
     });
 
-    fit("should return an Observable with array of movies data", () => {
+    it("should return an Observable with array of movies data", () => {
         testScheduler.run((helpers: RunHelpers) => {
-            const moviesResult: Array<JoinedMovieDataCheckbox> = [
-                {
-                    isAddedToWatchList: true,
-                    id: 597,
-                    overview: "overview",
-                    poster: "poster",
-                    releaseDate: "2010-01-01",
-                    title: "Titanic",
-                    addInfo: [
-                        {
-                            id: 100,
-                            name: "John Doe",
-                            order: 200,
-                            profile_path: "test_profile_path"
-                        }
-                    ]
-                }
-            ];
-            // spyOn(Utils, "joinedMovieObject").and.returnValue();
-            // httpMock.get.and.callFake(params => {
-            //     // if fetch list return of(fakeList)
-            //     // else return of movieInfo
-            // });
-            helpers.expectObservable(fetchMoviesService.getMoviesStream(), "15s !").toBe("10s a", { a: moviesResult });
-        });
-    });
+            fetchMoviesService.fetchMovies("Test");
 
-    it("should return an Observable with array of movies data searched by movie name", () => {
-        const moviesResult: Array<JoinedMovieDataCheckbox> = [
-            {
-                isAddedToWatchList: true,
-                id: 597,
-                overview: "overview",
-                poster: "poster",
-                releaseDate: "2010-01-01",
-                title: "Titanic",
-                addInfo: [
-                    {
-                        id: 100,
-                        name: "John Doe",
-                        order: 200,
-                        profile_path: "test_profile_path"
+            httpMock.get.and.callFake(
+                (a: any, b: any): Observable<any> => {
+                    if (a.includes(fetchedMovies.results[0].id)) {
+                        return of(additionalInfo);
+                    } else {
+                        return of(fetchedMovies);
                     }
-                ]
-            }
-        ];
+                }
+            );
+            filmsToWatchListSubj.next([]);
 
-        fetchMoviesService.fetchMovies("Titanic");
-        fetchMoviesService.getMoviesStream().subscribe((movies: any) => {
-            expect(movies.length).toBe(1);
-
-            expect(movies).toEqual(moviesResult);
+            helpers
+                .expectObservable(fetchMoviesService.getMoviesStream(), "^ 15s !")
+                .toBe("0ms a", { a: moviesResult });
         });
     });
 });
