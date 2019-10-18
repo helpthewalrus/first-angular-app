@@ -22,10 +22,10 @@ fdescribe("FetchMoviesService", () => {
     const filmsToWatchListSubj: BehaviorSubject<Array<JoinedMovieDataCheckbox>> = new BehaviorSubject(undefined);
     filmsToWatchFacadeMock.filmsToWatchList$ = filmsToWatchListSubj.asObservable();
 
-    const fetchedMovies: FetchedMovies = {
+    const fetchedMoviesFirstPage: FetchedMovies = {
         page: 1,
-        total_results: 1,
-        total_pages: 1,
+        total_results: 2,
+        total_pages: 2,
         results: [
             {
                 id: 597,
@@ -37,7 +37,7 @@ fdescribe("FetchMoviesService", () => {
         ]
     };
 
-    const additionalInfo: AdditionalMovieData = {
+    const additionalInfoFirstPage: AdditionalMovieData = {
         credits: {
             cast: [
                 {
@@ -55,7 +55,7 @@ fdescribe("FetchMoviesService", () => {
         title: "Titanic"
     };
 
-    const moviesResult: Array<JoinedMovieDataCheckbox> = [
+    const moviesResultFirstPage: Array<JoinedMovieDataCheckbox> = [
         {
             isAddedToWatchList: false,
             id: 597,
@@ -74,6 +74,58 @@ fdescribe("FetchMoviesService", () => {
         }
     ];
 
+    const fetchedMoviesSecondPage: FetchedMovies = {
+        page: 2,
+        total_results: 2,
+        total_pages: 2,
+        results: [
+            {
+                id: 600,
+                overview: "overview_page2",
+                poster_path: "poster_page2",
+                release_date: "2020-02-02",
+                title: "Titanic_page2"
+            }
+        ]
+    };
+
+    const additionalInfoSecondPage: AdditionalMovieData = {
+        credits: {
+            cast: [
+                {
+                    id: 200,
+                    name: "John Doe Junior",
+                    order: 300,
+                    profile_path: "test_profile_path_page2"
+                }
+            ]
+        },
+        id: 600,
+        overview: "overview_page2",
+        poster_path: "poster_page2",
+        release_date: "2020-02-02",
+        title: "Titanic_page2"
+    };
+
+    const moviesResultSecondPage: Array<JoinedMovieDataCheckbox> = [
+        {
+            isAddedToWatchList: false,
+            id: 600,
+            overview: "overview_page2",
+            poster: "poster_page2",
+            releaseDate: "2020-02-02",
+            title: "Titanic_page2",
+            addInfo: [
+                {
+                    id: 200,
+                    name: "John Doe Junior",
+                    order: 300,
+                    profile_path: "test_profile_path_page2"
+                }
+            ]
+        }
+    ];
+
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
@@ -86,24 +138,61 @@ fdescribe("FetchMoviesService", () => {
         fetchMoviesService = TestBed.get(FetchMoviesService);
     });
 
-    it("should return an Observable with array of movies data", () => {
+    it("should return an Observable with array of movies data from first page (fetchMovies)", () => {
         testScheduler.run((helpers: RunHelpers) => {
+            httpMock.get.and.callFake(
+                (a: string): Observable<any> => {
+                    if (a.includes(fetchedMoviesFirstPage.results[0].id.toString())) {
+                        return of(additionalInfoFirstPage) as Observable<AdditionalMovieData>;
+                    } else {
+                        return of(fetchedMoviesFirstPage) as Observable<FetchedMovies>;
+                    }
+                }
+            );
+
+            filmsToWatchListSubj.next([]);
+            const querySubject: Observable<
+                Array<JoinedMovieDataCheckbox | string>
+            > = fetchMoviesService.getMoviesStream();
+
             fetchMoviesService.fetchMovies("Test");
 
+            helpers.expectObservable(querySubject, "15s !").toBe("a", { a: moviesResultFirstPage });
+        });
+    });
+
+    it("should return an Observable with array of movies data from two pages (getNextPage)", () => {
+        testScheduler.run((helpers: RunHelpers) => {
+            let counter: number = 1;
+
             httpMock.get.and.callFake(
-                (a: any, b: any): Observable<any> => {
-                    if (a.includes(fetchedMovies.results[0].id)) {
-                        return of(additionalInfo);
-                    } else {
-                        return of(fetchedMovies);
+                (a: string): Observable<any> => {
+                    if (counter === 1) {
+                        if (a.includes(fetchedMoviesFirstPage.results[0].id.toString())) {
+                            counter++;
+                            return of(additionalInfoFirstPage) as Observable<AdditionalMovieData>;
+                        }
+                        return of(fetchedMoviesFirstPage) as Observable<FetchedMovies>;
+                    } else if (counter === 2) {
+                        if (a.includes(fetchedMoviesSecondPage.results[0].id.toString())) {
+                            return of(additionalInfoSecondPage) as Observable<AdditionalMovieData>;
+                        }
+                        return of(fetchedMoviesSecondPage) as Observable<FetchedMovies>;
                     }
                 }
             );
             filmsToWatchListSubj.next([]);
 
-            helpers
-                .expectObservable(fetchMoviesService.getMoviesStream(), "^ 15s !")
-                .toBe("0ms a", { a: moviesResult });
+            const querySubject: Observable<
+                Array<JoinedMovieDataCheckbox | string>
+            > = fetchMoviesService.getMoviesStream();
+            fetchMoviesService.fetchMovies("Test");
+
+            helpers.expectObservable(querySubject, "15s !").toBe("a", { a: moviesResultFirstPage });
+
+            fetchMoviesService.getNextPage();
+
+            helpers.expectObservable(querySubject, "15s !").toBe("10s a", { a: moviesResultSecondPage });
         });
     });
 });
