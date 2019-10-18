@@ -47,7 +47,7 @@ export class FetchMoviesService {
     /**
      * Date that stores last fetching movies' date
      */
-    private comparisonDate: Date = new Date(0);
+    private comparisonDate: number = 0;
 
     /**
      * Total amount of pages with searched movie
@@ -83,23 +83,19 @@ export class FetchMoviesService {
                             map((data: FetchedMovies) => (data.results.length > 0 ? data.results : []))
                         );
                     }),
-                    switchMap((movies: Array<MovieData>) =>
-                        movies.length <= 0
-                            ? of([])
+                    switchMap((movies: Array<MovieData>) => {
+                        return movies.length <= 0
+                            ? of([constants.NO_MOVIES_FOUND])
                             : this.parseFetchedMoviesData(movies).pipe(
-                                  map((moviesInfo: Array<AdditionalMovieData>) =>
-                                      movies.length > 0
-                                          ? Utils.joinedMovieObject(moviesInfo)
-                                          : [constants.NO_MOVIES_FOUND]
-                                  )
-                              )
-                    ),
+                                  map((moviesInfo: Array<AdditionalMovieData>) => Utils.joinedMovieObject(moviesInfo))
+                              );
+                    }),
                     retryWhen((errors: BehaviorSubject<HttpErrorResponse>) => {
                         return errors.pipe(
                             switchMap((data: HttpErrorResponse) => (data.status !== 429 ? throwError(data) : of(true)))
                         );
                     }),
-                    tap(() => (this.comparisonDate = new Date())),
+                    tap(() => (this.comparisonDate = Date.now())),
                     scan((acc: Array<JoinedMovieDataCheckbox>, current: Array<JoinedMovieDataCheckbox>) => {
                         if (typeof current[0] !== "string") {
                             acc = [...acc, ...current];
@@ -107,17 +103,15 @@ export class FetchMoviesService {
                         }
                         return current;
                     }, []),
-                    switchMap((movies: Array<JoinedMovieData>) =>
-                        movies.length <= 0
-                            ? of([])
-                            : this.getChosenMoviesObservable().pipe(
+                    switchMap((movies: Array<JoinedMovieData>) => {
+                        return isString(movies[0])
+                            ? ((of(movies) as unknown) as Observable<Array<string>>)
+                            : (this.getChosenMoviesObservable().pipe(
                                   map((filmsToWatchList: Array<JoinedMovieDataCheckbox>) =>
-                                      !isString(movies[0])
-                                          ? this.addCheckboxToFoundMovies(movies, filmsToWatchList)
-                                          : [constants.NO_MOVIES_FOUND]
+                                      this.addCheckboxToFoundMovies(movies, filmsToWatchList)
                                   )
-                              )
-                    ),
+                              ) as Observable<Array<JoinedMovieDataCheckbox>>);
+                    }),
                     catchError((errorObject: HttpErrorResponse) => {
                         const message: string =
                             errorObject.error && errorObject.error.status_message
@@ -197,12 +191,10 @@ export class FetchMoviesService {
      */
     private countDebounce(): number {
         const currDate: number = Date.now();
-        if (constants.DEBOUNCE_TIME + this.comparisonDate.getTime() < currDate) {
-            this.comparisonDate = new Date();
+        if (constants.DEBOUNCE_TIME + this.comparisonDate < currDate) {
             return 0;
         } else {
-            const debouncer: number = this.comparisonDate.getTime() - currDate + constants.DEBOUNCE_TIME;
-            this.comparisonDate = new Date();
+            const debouncer: number = this.comparisonDate - currDate + constants.DEBOUNCE_TIME;
             return debouncer;
         }
     }
