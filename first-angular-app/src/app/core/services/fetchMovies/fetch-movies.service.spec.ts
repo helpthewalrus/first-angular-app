@@ -305,4 +305,91 @@ fdescribe("FetchMoviesService", () => {
             helpers.expectObservable(querySubject, "15s !").toBe("a", { a: chosenMovies });
         });
     });
+
+    it("should return an Observable with Error that has 'status_message' property", () => {
+        const statusMessage: string = "Status message";
+
+        const error: HttpErrorResponse = new HttpErrorResponse({
+            error: {
+                status_message: statusMessage
+            },
+            status: 404,
+            statusText: "Status text",
+            url: "url"
+        });
+
+        testScheduler.run((helpers: RunHelpers) => {
+            httpMock.get.and.returnValue(throwError(error));
+
+            filmsToWatchListSubj.next([]);
+
+            const querySubject: Observable<
+                Array<JoinedMovieDataCheckbox | string>
+            > = fetchMoviesService.getMoviesStream();
+
+            fetchMoviesService.fetchMovies("Test");
+
+            helpers.expectObservable(querySubject, "15s !").toBe("a", { a: [statusMessage] });
+        });
+    });
+
+    it("should return an Observable with 'UNKNOWN_ERROR_MESSAGE' cause Error has NO 'status_message' property", () => {
+        const error: HttpErrorResponse = new HttpErrorResponse({
+            error: "404 error occured",
+            status: 404,
+            url: "url"
+        });
+
+        testScheduler.run((helpers: RunHelpers) => {
+            httpMock.get.and.returnValue(throwError(error));
+
+            filmsToWatchListSubj.next([]);
+
+            const querySubject: Observable<
+                Array<JoinedMovieDataCheckbox | string>
+            > = fetchMoviesService.getMoviesStream();
+
+            fetchMoviesService.fetchMovies("Test");
+
+            helpers.expectObservable(querySubject, "15s !").toBe("a", { a: [constants.UNKNOWN_ERROR_MESSAGE] });
+        });
+    });
+
+    xit("should retry searching movies after 429 error occured", () => {
+        const error: HttpErrorResponse = new HttpErrorResponse({
+            error: "429 error occured",
+            status: 429,
+            url: "url"
+        });
+
+        testScheduler.run((helpers: RunHelpers) => {
+            let counter: number = 1;
+
+            if (counter === 1) {
+                console.log(counter);
+                counter++;
+                httpMock.get.and.returnValue(throwError(error));
+            } else {
+                httpMock.get.and.callFake(
+                    (a: string): Observable<any> => {
+                        if (a.includes(fetchedMoviesFirstPage.results[0].id.toString())) {
+                            return of(additionalInfoFirstPage) as Observable<AdditionalMovieData>;
+                        } else {
+                            return of(fetchedMoviesFirstPage) as Observable<FetchedMovies>;
+                        }
+                    }
+                );
+            }
+
+            filmsToWatchListSubj.next([]);
+
+            const querySubject: Observable<
+                Array<JoinedMovieDataCheckbox | string>
+            > = fetchMoviesService.getMoviesStream();
+
+            fetchMoviesService.fetchMovies("Test");
+
+            helpers.expectObservable(querySubject, "15s !").toBe("a", { a: moviesResultFirstPage });
+        });
+    });
 });
