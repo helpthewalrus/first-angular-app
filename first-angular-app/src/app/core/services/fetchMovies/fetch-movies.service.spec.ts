@@ -366,7 +366,6 @@ fdescribe("FetchMoviesService", () => {
             let counter: number = 1;
 
             if (counter === 1) {
-                console.log(counter);
                 counter++;
                 httpMock.get.and.returnValue(throwError(error));
             } else {
