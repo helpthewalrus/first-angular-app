@@ -1,11 +1,22 @@
 import { Component, ChangeDetectionStrategy, OnInit, OnDestroy } from "@angular/core";
 
-import { Observable } from "rxjs";
-import { shareReplay, tap } from "rxjs/operators";
+import { Observable, of } from "rxjs";
+import { shareReplay, tap, map, switchMap, filter, scan } from "rxjs/operators";
 
 import * as isString from "lodash/isString";
 
-import { FetchMoviesService, JoinedMovieDataCheckbox, FilmsToWatchFacade } from "../core/index";
+import {
+    QueryMoviesFacadeService,
+    JoinedMovieData,
+    JoinedMovieDataCheckbox,
+    FilmsToWatchFacade,
+    FetchedAdditionalMovies,
+    buildMoviesWithChosenInfo,
+    SearchError,
+    addCheckboxToFoundMovies
+} from "../core/index";
+
+import { constants } from "../core/constants";
 
 @Component({
     selector: "app-app-movie-search-page",
@@ -13,16 +24,26 @@ import { FetchMoviesService, JoinedMovieDataCheckbox, FilmsToWatchFacade } from 
     styleUrls: ["./app-movie-search-page.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
+export class AppMovieSearchPageComponent implements OnInit /* , OnDestroy */ {
     /**
      * Ngrx store facade of the app
      */
     private filmsToWatchFacade: FilmsToWatchFacade;
 
     /**
-     * Service for fetching data about movies according to user input
+     * Facade service for fetching data about movies according to user input
      */
-    private fetchMoviesService: FetchMoviesService;
+    private queryMoviesFacadeService: QueryMoviesFacadeService;
+
+    /**
+     * Number of current page
+     */
+    public currentPage: number = 1;
+
+    /**
+     * Amount of pages fetched according to user input
+     */
+    public totalAmountOfPages: number;
 
     /**
      * Indicator used for loading data from server
@@ -49,22 +70,49 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
      */
     public isStringLodash = isString;
 
-    constructor(fetchMoviesService: FetchMoviesService, filmsToWatchFacade: FilmsToWatchFacade) {
-        this.fetchMoviesService = fetchMoviesService;
+    constructor(queryMoviesFacadeService: QueryMoviesFacadeService, filmsToWatchFacade: FilmsToWatchFacade) {
+        this.queryMoviesFacadeService = queryMoviesFacadeService;
         this.filmsToWatchFacade = filmsToWatchFacade;
     }
 
     public ngOnInit(): void {
-        this.resultMovies$ = this.fetchMoviesService.getMoviesStream().pipe(
+        this.resultMovies$ = this.transformFetchedMoviesData();
+    }
+
+    private transformFetchedMoviesData(): Observable<Array<string> | JoinedMovieDataCheckbox[]> {
+        return this.queryMoviesFacadeService.getMoviesStream().pipe(
+            tap((data: FetchedAdditionalMovies | SearchError) => {
+                if (!(data as SearchError).error) {
+                    this.totalAmountOfPages = (data as FetchedAdditionalMovies).total_pages;
+                    this.currentPage = (data as FetchedAdditionalMovies).page;
+                    this.isLastPage = this.totalAmountOfPages <= this.currentPage ? true : false;
+                }
+            }),
+            map((fetchedAdditionalMovies: FetchedAdditionalMovies | SearchError) => {
+                if ((fetchedAdditionalMovies as SearchError).error) {
+                    return fetchedAdditionalMovies as SearchError;
+                }
+                return buildMoviesWithChosenInfo(fetchedAdditionalMovies as FetchedAdditionalMovies);
+            }),
+            switchMap((moviesJoinedData: Array<JoinedMovieData> | SearchError) => {
+                if ((moviesJoinedData as SearchError).error) {
+                    return of([(moviesJoinedData as SearchError).error]);
+                }
+                return this.filmsToWatchFacade.filmsToWatchList$.pipe(
+                    map((filmsToWatchList: Array<JoinedMovieDataCheckbox>) =>
+                        addCheckboxToFoundMovies(moviesJoinedData as Array<JoinedMovieData>, filmsToWatchList)
+                    )
+                );
+            }),
             shareReplay(1),
             tap(() => (this.isLoading = false)),
             tap(() => (this.isMovieListHidden = false))
         );
     }
 
-    public ngOnDestroy(): void {
-        this.fetchMoviesService.resetSearchQuery();
-    }
+    // public ngOnDestroy(): void {
+    //     this.fetchMoviesService.resetSearchQuery();
+    // }
 
     /**
      * Search movies on the server and put result into resultMovies$ variable
@@ -77,7 +125,7 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
             this.isLoading = true;
             this.isMovieListHidden = true;
 
-            this.fetchMoviesService.fetchMovies(movieName);
+            this.queryMoviesFacadeService.fetchMovies(movieName);
         }
     }
 
@@ -85,11 +133,11 @@ export class AppMovieSearchPageComponent implements OnInit, OnDestroy {
      * Search additional portion of movies on the server and result is reflected in resultMovies$ variable
      */
     public getNextPage(): void {
+        this.currentPage++;
         if (!this.isLastPage) {
             this.isLoading = true;
-            this.fetchMoviesService.getNextPage();
+            this.queryMoviesFacadeService.getNextPage(this.currentPage);
         }
-        this.isLastPage = this.fetchMoviesService.isLastPage;
     }
 
     /**
