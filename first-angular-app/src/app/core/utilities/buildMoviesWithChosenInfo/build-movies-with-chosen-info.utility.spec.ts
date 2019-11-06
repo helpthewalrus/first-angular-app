@@ -1,10 +1,10 @@
-import { joinedMovieObject } from "./joined-movie-object.utility";
+import { buildMoviesWithChosenInfo } from "./build-movies-with-chosen-info.utility";
 
-import { AdditionalMovieData, JoinedMovieData } from "../services/index";
+import { AdditionalMovieData, JoinedMovieData } from "../../services/index";
 
-describe("joinedMovieObject", () => {
+describe("buildMoviesWithChosenInfo", () => {
     it("should return empty array if no data provided in source array", () => {
-        const result: Array<JoinedMovieData> = joinedMovieObject([]);
+        const result: Array<JoinedMovieData> = buildMoviesWithChosenInfo([]);
         expect(result).toEqual([]);
     });
 
@@ -56,7 +56,7 @@ describe("joinedMovieObject", () => {
             }
         ];
 
-        const result: Array<JoinedMovieData> = joinedMovieObject(inputObject);
+        const result: Array<JoinedMovieData> = buildMoviesWithChosenInfo(inputObject);
 
         expect(result).toEqual(resultObject);
     });

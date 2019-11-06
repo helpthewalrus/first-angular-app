@@ -9,5 +9,7 @@ export {
     ProductionCompanies,
     SpokenLanguages,
     MovieCrewData,
-    JoinedMovieDataCheckbox
+    JoinedMovieDataCheckbox,
+    SearchError,
+    FetchedAdditionalMovies
 } from "./models/index";

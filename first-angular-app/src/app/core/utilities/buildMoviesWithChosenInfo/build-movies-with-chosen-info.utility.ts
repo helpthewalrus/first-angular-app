@@ -1,12 +1,12 @@
-import { AdditionalMovieData, JoinedMovieData } from "../index";
+import { AdditionalMovieData, JoinedMovieData, FetchedAdditionalMovies } from "../../index";
 
 /**
  * Create array of objects with combined data about movies and their cast
  *
  * @param moviesInfo - array of objects with fetched data about movies
  */
-export function joinedMovieObject(moviesInfo: Array<AdditionalMovieData>): Array<JoinedMovieData> {
-    return moviesInfo.map((movieInfo: AdditionalMovieData) => {
+export function buildMoviesWithChosenInfo(fetchedAdditionalMovies: FetchedAdditionalMovies): Array<JoinedMovieData> {
+    return fetchedAdditionalMovies.results.map((movieInfo: AdditionalMovieData) => {
         return {
             id: movieInfo.id,
             title: movieInfo.title,

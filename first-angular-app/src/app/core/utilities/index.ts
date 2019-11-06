@@ -1,1 +1,3 @@
-export { joinedMovieObject } from "./joined-movie-object.utility";
+export { buildMoviesWithChosenInfo } from "./buildMoviesWithChosenInfo/index";
+export { addCheckboxToFoundMovies } from "./addCheckBoxToFoundMovies/index";
+export { countDebounce } from "./countDebounce/index";
