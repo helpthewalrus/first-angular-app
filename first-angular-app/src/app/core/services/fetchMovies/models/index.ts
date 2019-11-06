@@ -8,3 +8,5 @@ export { ProductionCompanies } from "./production-companies.interface";
 export { SpokenLanguages } from "./spoken-languages.interface";
 export { MovieCrewData } from "./movie-crew-data.interface";
 export { JoinedMovieDataCheckbox } from "./joined-movie-data-checkbox.interface";
+export { SearchError } from "./search-error.interface";
+export { FetchedAdditionalMovies } from "./fetched-additional-movies.interface";
