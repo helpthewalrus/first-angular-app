@@ -88,6 +88,16 @@ export class AppMovieSearchPageComponent implements OnInit /* , OnDestroy */ {
                     this.isLastPage = this.totalAmountOfPages <= this.currentPage ? true : false;
                 }
             }),
+            scan(
+                (acc: FetchedAdditionalMovies, current: FetchedAdditionalMovies) => {
+                    acc.page = current.page;
+                    acc.total_pages = current.total_pages;
+                    acc.total_results = current.total_results;
+                    acc.results = [...acc.results, ...current.results];
+                    return acc;
+                },
+                { page: 0, total_pages: 0, total_results: 0, results: [] } as FetchedAdditionalMovies
+            ),
             map((fetchedAdditionalMovies: FetchedAdditionalMovies | SearchError) => {
                 if ((fetchedAdditionalMovies as SearchError).error) {
                     return fetchedAdditionalMovies as SearchError;
@@ -125,7 +135,7 @@ export class AppMovieSearchPageComponent implements OnInit /* , OnDestroy */ {
             this.isLoading = true;
             this.isMovieListHidden = true;
 
-            this.queryMoviesFacadeService.fetchMovies(movieName);
+            this.queryMoviesFacadeService.fetchMovies({ movieName, pageNumber: this.currentPage });
         }
     }
 

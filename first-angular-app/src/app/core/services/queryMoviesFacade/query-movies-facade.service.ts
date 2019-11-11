@@ -28,7 +28,10 @@ export class QueryMoviesFacadeService {
     /**
      * Subject that stores data according to user search input
      */
-    private querySubject: BehaviorSubject<string> = new BehaviorSubject("");
+    private querySubject: BehaviorSubject<{ movieName: string; pageNumber: number }> = new BehaviorSubject({
+        movieName: "",
+        pageNumber: 1
+    });
 
     /**
      * Date that stores last fetching movies' date
@@ -47,22 +50,31 @@ export class QueryMoviesFacadeService {
     /**
      * Create stream to fetch movies and movie cast data from server
      */
-    public getMoviesData(): Observable<FetchedMovies | SearchError> {
+    public getMoviesData(): Observable<FetchedMovies> | Error {
         return this.querySubject.asObservable().pipe(
-            filter((query: string) => !!query),
-            switchMap((movieName: string) => {
-                this.pageSubject = new BehaviorSubject(1);
-                return this.pageSubject.asObservable().pipe(
-                    debounce(() => timer(countDebounce(this.comparisonDate))),
-                    switchMap((currentPage: number) => this.getMovies(movieName, currentPage)),
-                    tap(() => (this.comparisonDate = Date.now())),
-                    catchError((errorObject: HttpErrorResponse) => this.handleError(errorObject))
-                );
+            filter((queryObject: { movieName: string; pageNumber: number }) => !!queryObject.movieName),
+            switchMap((queryObject: { movieName: string; pageNumber: number }) => {
+                // this.pageSubject = new BehaviorSubject(1);
+                // return this.pageSubject.asObservable().pipe(
+                //     debounce(() => timer(countDebounce(this.comparisonDate))),
+                return this.getMovies(
+                    queryObject.movieName,
+                    queryObject.pageNumber
+                ); /* .pipe(
+                    catchError((errorObject: HttpErrorResponse) => {
+                        throw new Error(this.handleError(errorObject));
+                    })
+                ) */
+                // tap(() => (this.comparisonDate = Date.now())),
+                // );
+            }),
+            catchError((errorObject: HttpErrorResponse) => {
+                throw new Error(this.handleError(errorObject));
             })
         );
     }
 
-    public handleError(errorObject: HttpErrorResponse | string): Observable<SearchError> {
+    public handleError(errorObject: HttpErrorResponse | string): string {
         let message: string = "";
 
         if (this.isStringLodash(errorObject)) {
@@ -73,14 +85,17 @@ export class QueryMoviesFacadeService {
                     ? (errorObject as HttpErrorResponse).error.status_message
                     : constants.UNKNOWN_ERROR_MESSAGE;
         }
-
-        return of({ error: message });
+        return message;
+        // throw new Error(message);
     }
 
-    public getAdditionalMoviesData(fetchedData: FetchedMovies): Observable<FetchedAdditionalMovies | SearchError> {
-        return of(fetchedData).pipe(
-            switchMap((fetchedMovies: FetchedMovies) => {
-                return fetchedMovies.results.length <= 0 ? throwError(constants.NO_MOVIES_FOUND) : of(fetchedMovies);
+    public getAdditionalMoviesData(fetchedData: Observable<FetchedMovies>): Observable<FetchedAdditionalMovies> {
+        return fetchedData.pipe(
+            map((fetchedMovies: FetchedMovies) => {
+                if (fetchedMovies.results.length <= 0) {
+                    throw new Error(constants.NO_MOVIES_FOUND);
+                }
+                return fetchedMovies;
             }),
             switchMap((movies: FetchedMovies) => {
                 return forkJoin(
@@ -93,43 +108,35 @@ export class QueryMoviesFacadeService {
                     })
                 );
             }),
-            retryWhen((errors: BehaviorSubject<HttpErrorResponse>) =>
-                errors.pipe(switchMap((data: HttpErrorResponse) => (data.status !== 429 ? throwError(data) : of(true))))
-            ),
-            tap(() => (this.comparisonDate = Date.now())),
-            catchError((errorObject: HttpErrorResponse | string) => {
-                return this.handleError(errorObject);
+            // retryWhen((errors: BehaviorSubject<HttpErrorResponse>) =>
+            // errors.pipe(switchMap((data: HttpErrorResponse) => (data.status !== 429 ? throwError(data) : of(true))))
+            // ),
+            // tap(() => (this.comparisonDate = Date.now())),
+            catchError((errorObject: HttpErrorResponse) => {
+                throw new Error(this.handleError(errorObject));
             })
         );
     }
 
-    public getMoviesStream(): Observable<FetchedAdditionalMovies | SearchError> {
-        return this.getMoviesData().pipe(
-            concatMap((data: FetchedMovies | SearchError) => {
-                if ((data as SearchError).error) {
-                    throwError((data as SearchError).error);
-                } else {
-                    return this.getAdditionalMoviesData(data as FetchedMovies).pipe(
-                        switchMap((fetchedData: FetchedAdditionalMovies | SearchError) =>
-                            (fetchedData as SearchError).error
-                                ? throwError((fetchedData as SearchError).error)
-                                : of(fetchedData as FetchedAdditionalMovies)
-                        ),
-                        scan(
-                            (acc: FetchedAdditionalMovies, current: FetchedAdditionalMovies) => {
-                                acc.page = current.page;
-                                acc.total_pages = current.total_pages;
-                                acc.total_results = current.total_results;
-                                acc.results = [...acc.results, ...current.results];
-                                return acc;
-                            },
-                            { page: 0, total_pages: 0, total_results: 0, results: [] } as FetchedAdditionalMovies
-                        )
-                    );
-                }
-            }),
-            catchError((errorObject: HttpErrorResponse | string) => this.handleError(errorObject))
-        );
+    public getMoviesStream(): Observable<FetchedAdditionalMovies> {
+        return this.getAdditionalMoviesData(this.getMoviesData() as Observable<FetchedMovies>);
+        //                 scan(
+        //                     (acc: FetchedAdditionalMovies, current: FetchedAdditionalMovies) => {
+        //                         acc.page = current.page;
+        //                         acc.total_pages = current.total_pages;
+        //                         acc.total_results = current.total_results;
+        //                         acc.results = [...acc.results, ...current.results];
+        //                         return acc;
+        //                     },
+        //                     { page: 0, total_pages: 0, total_results: 0, results: [] } as FetchedAdditionalMovies
+        //                 )
+        //             );
+        //         }
+        //     }),
+        //     catchError((errorObject: HttpErrorResponse | string) => {
+        //         throw new Error(this.handleError(errorObject));
+        //     })
+        // );
     }
 
     /**
@@ -144,8 +151,8 @@ export class QueryMoviesFacadeService {
      *
      * @param movieName - input value used to search movies
      */
-    public fetchMovies(movieName: string): void {
-        this.querySubject.next(movieName);
+    public fetchMovies(argObject: { movieName: string; pageNumber: number }): void {
+        this.querySubject.next(argObject);
     }
 
     public getMovies(movieName: string, pageNumber: number): Observable<FetchedMovies> {
