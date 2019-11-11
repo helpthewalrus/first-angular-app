@@ -79,7 +79,7 @@ export class QueryMoviesFacadeService {
 
     public getAdditionalMoviesData(fetchedData: FetchedMovies): Observable<FetchedAdditionalMovies | SearchError> {
         return of(fetchedData).pipe(
-            concatMap((fetchedMovies: FetchedMovies) => {
+            switchMap((fetchedMovies: FetchedMovies) => {
                 return fetchedMovies.results.length <= 0 ? throwError(constants.NO_MOVIES_FOUND) : of(fetchedMovies);
             }),
             switchMap((movies: FetchedMovies) => {
@@ -105,28 +105,29 @@ export class QueryMoviesFacadeService {
 
     public getMoviesStream(): Observable<FetchedAdditionalMovies | SearchError> {
         return this.getMoviesData().pipe(
-            switchMap((data: FetchedMovies | SearchError) => {
+            concatMap((data: FetchedMovies | SearchError) => {
                 if ((data as SearchError).error) {
                     throwError((data as SearchError).error);
                 } else {
-                    return this.getAdditionalMoviesData(data as FetchedMovies);
+                    return this.getAdditionalMoviesData(data as FetchedMovies).pipe(
+                        switchMap((fetchedData: FetchedAdditionalMovies | SearchError) =>
+                            (fetchedData as SearchError).error
+                                ? throwError((fetchedData as SearchError).error)
+                                : of(fetchedData as FetchedAdditionalMovies)
+                        ),
+                        scan(
+                            (acc: FetchedAdditionalMovies, current: FetchedAdditionalMovies) => {
+                                acc.page = current.page;
+                                acc.total_pages = current.total_pages;
+                                acc.total_results = current.total_results;
+                                acc.results = [...acc.results, ...current.results];
+                                return acc;
+                            },
+                            { page: 0, total_pages: 0, total_results: 0, results: [] } as FetchedAdditionalMovies
+                        )
+                    );
                 }
             }),
-            concatMap((data: FetchedAdditionalMovies | SearchError) =>
-                (data as SearchError).error
-                    ? throwError((data as SearchError).error)
-                    : of(data as FetchedAdditionalMovies)
-            ),
-            scan(
-                (acc: FetchedAdditionalMovies, current: FetchedAdditionalMovies) => {
-                    acc.page = current.page;
-                    acc.total_pages = current.total_pages;
-                    acc.total_results = current.total_results;
-                    acc.results = [...acc.results, ...current.results];
-                    return acc;
-                },
-                { page: 0, total_pages: 0, total_results: 0, results: [] } as FetchedAdditionalMovies
-            ),
             catchError((errorObject: HttpErrorResponse | string) => this.handleError(errorObject))
         );
     }
