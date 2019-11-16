@@ -5,4 +5,5 @@ export interface FetchedMovies {
     total_results: number;
     total_pages: number;
     results: MovieData[];
+    error?: string;
 }

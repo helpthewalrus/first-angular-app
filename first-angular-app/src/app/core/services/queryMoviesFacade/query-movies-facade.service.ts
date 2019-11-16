@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, ɵConsole } from "@angular/core";
 
 import { Observable, BehaviorSubject, of, forkJoin, throwError, timer } from "rxjs";
 import { filter, switchMap, retryWhen, tap, debounce, catchError, scan, map, concatMap } from "rxjs/operators";
@@ -50,13 +50,15 @@ export class QueryMoviesFacadeService {
     /**
      * Create stream to fetch movies and movie cast data from server
      */
-    public getMoviesData(): Observable<FetchedMovies> | Error {
+    public getMoviesData(): Observable<FetchedMovies | HttpErrorResponse> {
+        console.log("getMoviesData");
         return this.querySubject.asObservable().pipe(
+            tap((data: any) => console.log(data)),
             filter((queryObject: { movieName: string; pageNumber: number }) => !!queryObject.movieName),
+            debounce(() => timer(countDebounce(this.comparisonDate))),
             switchMap((queryObject: { movieName: string; pageNumber: number }) => {
                 // this.pageSubject = new BehaviorSubject(1);
                 // return this.pageSubject.asObservable().pipe(
-                //     debounce(() => timer(countDebounce(this.comparisonDate))),
                 return this.getMovies(
                     queryObject.movieName,
                     queryObject.pageNumber
@@ -65,37 +67,59 @@ export class QueryMoviesFacadeService {
                         throw new Error(this.handleError(errorObject));
                     })
                 ) */
-                // tap(() => (this.comparisonDate = Date.now())),
                 // );
             }),
+            tap(() => (this.comparisonDate = Date.now())),
             catchError((errorObject: HttpErrorResponse) => {
-                throw new Error(this.handleError(errorObject));
+                console.log("catchError triggered", errorObject);
+                const mess: any = this.handleError(errorObject);
+                return of({
+                    page: undefined,
+                    total_results: undefined,
+                    total_pages: undefined,
+                    results: undefined,
+                    error: mess
+                });
             })
+            // catchError(this.handleError)
         );
     }
 
     public handleError(errorObject: HttpErrorResponse | string): string {
+        console.log(errorObject as HttpErrorResponse);
         let message: string = "";
 
         if (this.isStringLodash(errorObject)) {
             message = errorObject as string;
+        } else if ((errorObject as HttpErrorResponse).message) {
+            message = (errorObject as HttpErrorResponse).message;
+        } else if (
+            (errorObject as HttpErrorResponse).error &&
+            (errorObject as HttpErrorResponse).error.status_message
+        ) {
+            message = (errorObject as HttpErrorResponse).error.status_message;
         } else {
-            message =
-                (errorObject as HttpErrorResponse).error && (errorObject as HttpErrorResponse).error.status_message
-                    ? (errorObject as HttpErrorResponse).error.status_message
-                    : constants.UNKNOWN_ERROR_MESSAGE;
+            message = constants.UNKNOWN_ERROR_MESSAGE;
         }
+
         return message;
-        // throw new Error(message);
     }
 
-    public getAdditionalMoviesData(fetchedData: Observable<FetchedMovies>): Observable<FetchedAdditionalMovies> {
+    public getAdditionalMoviesData(
+        fetchedData: Observable<FetchedMovies>
+    ): Observable<FetchedAdditionalMovies | HttpErrorResponse> {
+        console.log("getAdditionalMoviesData", fetchedData);
         return fetchedData.pipe(
-            map((fetchedMovies: FetchedMovies) => {
-                if (fetchedMovies.results.length <= 0) {
-                    throw new Error(constants.NO_MOVIES_FOUND);
+            tap((data: any) => console.log("getAdditionalMoviesData IN PIPE", data)),
+            switchMap((fetchedMovies: FetchedMovies) => {
+                if (fetchedMovies.error) {
+                    return throwError(fetchedMovies.error);
+                } else if (fetchedMovies.results.length <= 0) {
+                    console.log("COMPARISON");
+                    return throwError(constants.NO_MOVIES_FOUND);
+                } else {
+                    return of(fetchedMovies);
                 }
-                return fetchedMovies;
             }),
             switchMap((movies: FetchedMovies) => {
                 return forkJoin(
@@ -108,35 +132,49 @@ export class QueryMoviesFacadeService {
                     })
                 );
             }),
-            // retryWhen((errors: BehaviorSubject<HttpErrorResponse>) =>
-            // errors.pipe(switchMap((data: HttpErrorResponse) => (data.status !== 429 ? throwError(data) : of(true))))
-            // ),
-            // tap(() => (this.comparisonDate = Date.now())),
-            catchError((errorObject: HttpErrorResponse) => {
-                throw new Error(this.handleError(errorObject));
+            retryWhen((errors: BehaviorSubject<HttpErrorResponse>) =>
+                errors.pipe(switchMap((data: HttpErrorResponse) => (data.status !== 429 ? throwError(data) : of(true))))
+            ),
+            tap(() => (this.comparisonDate = Date.now())),
+            catchError((errorObject: HttpErrorResponse | string) => {
+                console.log("getAdditionalMoviesData CATCH ERROR", errorObject);
+                // return throwError(this.handleError(errorObject));
+
+                // console.log("catchError triggered", errorObject);
+                const mess: any = this.handleError(errorObject);
+                return of({
+                    page: undefined,
+                    total_results: undefined,
+                    total_pages: undefined,
+                    results: undefined,
+                    error: mess
+                });
             })
         );
     }
 
     public getMoviesStream(): Observable<FetchedAdditionalMovies> {
-        return this.getAdditionalMoviesData(this.getMoviesData() as Observable<FetchedMovies>);
-        //                 scan(
-        //                     (acc: FetchedAdditionalMovies, current: FetchedAdditionalMovies) => {
-        //                         acc.page = current.page;
-        //                         acc.total_pages = current.total_pages;
-        //                         acc.total_results = current.total_results;
-        //                         acc.results = [...acc.results, ...current.results];
-        //                         return acc;
-        //                     },
-        //                     { page: 0, total_pages: 0, total_results: 0, results: [] } as FetchedAdditionalMovies
-        //                 )
-        //             );
-        //         }
-        //     }),
-        //     catchError((errorObject: HttpErrorResponse | string) => {
-        //         throw new Error(this.handleError(errorObject));
-        //     })
-        // );
+        const res: any = this.getAdditionalMoviesData(this.getMoviesData() as Observable<
+            FetchedMovies
+        >); /* .pipe(
+            catchError((errorObject: HttpErrorResponse) => {
+                console.log("getAdditionalMoviesData CATCH ERROR", errorObject);
+                // return throwError(this.handleError(errorObject));
+
+                // console.log("catchError triggered", errorObject);
+                debugger;
+                const mess: any = this.handleError(errorObject);
+                return of({
+                    page: undefined,
+                    total_results: undefined,
+                    total_pages: undefined,
+                    results: undefined,
+                    error: mess
+                });
+            })
+        ); */
+        console.log(res);
+        return res;
     }
 
     /**
@@ -156,6 +194,7 @@ export class QueryMoviesFacadeService {
     }
 
     public getMovies(movieName: string, pageNumber: number): Observable<FetchedMovies> {
+        // return new HttpErrorResponse({ error: { status_message: "Haha" }, status: 504 });
         return this.moviesHttpService.getMovies(movieName, pageNumber);
     }
 

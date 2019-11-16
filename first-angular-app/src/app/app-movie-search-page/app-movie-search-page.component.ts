@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, OnInit, OnDestroy } from "@angular/core";
 
 import { Observable, of } from "rxjs";
-import { shareReplay, tap, map, switchMap, filter, scan } from "rxjs/operators";
+import { shareReplay, tap, map, switchMap, filter, scan, catchError, concatMap } from "rxjs/operators";
+import { HttpErrorResponse } from "@angular/common/http";
 
 import * as isString from "lodash/isString";
 
@@ -35,6 +36,8 @@ export class AppMovieSearchPageComponent implements OnInit /* , OnDestroy */ {
      */
     private queryMoviesFacadeService: QueryMoviesFacadeService;
 
+    private currentQuery: string;
+
     /**
      * Number of current page
      */
@@ -58,7 +61,7 @@ export class AppMovieSearchPageComponent implements OnInit /* , OnDestroy */ {
     /**
      * Observable which contains array of found movies' data
      */
-    public resultMovies$: Observable<Array<JoinedMovieDataCheckbox | string>> = null;
+    public resultMovies$: any /* Observable<Array<JoinedMovieDataCheckbox | string>> */ = null;
 
     /**
      * Stores boolean value whether user is on the last page of searched movie
@@ -79,46 +82,72 @@ export class AppMovieSearchPageComponent implements OnInit /* , OnDestroy */ {
         this.resultMovies$ = this.transformFetchedMoviesData();
     }
 
-    private transformFetchedMoviesData(): Observable<Array<string> | JoinedMovieDataCheckbox[]> {
+    private transformFetchedMoviesData(): Observable<any> {
+        // Array<string | JoinedMovieDataCheckbox
         return this.queryMoviesFacadeService.getMoviesStream().pipe(
-            tap((data: FetchedAdditionalMovies | SearchError) => {
-                if (!(data as SearchError).error) {
-                    this.totalAmountOfPages = (data as FetchedAdditionalMovies).total_pages;
-                    this.currentPage = (data as FetchedAdditionalMovies).page;
-                    this.isLastPage = this.totalAmountOfPages <= this.currentPage ? true : false;
-                }
+            tap((data: any) => console.log("FROM COMPONENT")),
+            tap((data: FetchedAdditionalMovies) => {
+                this.totalAmountOfPages = (data as FetchedAdditionalMovies).total_pages;
+                this.currentPage = (data as FetchedAdditionalMovies).page;
+                this.isLastPage = this.totalAmountOfPages <= this.currentPage ? true : false;
             }),
             scan(
                 (acc: FetchedAdditionalMovies, current: FetchedAdditionalMovies) => {
+                    if (current.error) {
+                        return current;
+                    }
                     acc.page = current.page;
                     acc.total_pages = current.total_pages;
                     acc.total_results = current.total_results;
-                    acc.results = [...acc.results, ...current.results];
+                    acc.results = current.page === 1 ? [...current.results] : [...acc.results, ...current.results];
                     return acc;
                 },
-                { page: 0, total_pages: 0, total_results: 0, results: [] } as FetchedAdditionalMovies
+                { page: 0, total_pages: 0, total_results: 0, results: [], error: undefined }
             ),
-            map((fetchedAdditionalMovies: FetchedAdditionalMovies | SearchError) => {
-                if ((fetchedAdditionalMovies as SearchError).error) {
-                    return fetchedAdditionalMovies as SearchError;
+            switchMap((fetchedAdditionalMovies: FetchedAdditionalMovies) => {
+                if (fetchedAdditionalMovies.error) {
+                    return of([fetchedAdditionalMovies.error]);
                 }
-                return buildMoviesWithChosenInfo(fetchedAdditionalMovies as FetchedAdditionalMovies);
-            }),
-            switchMap((moviesJoinedData: Array<JoinedMovieData> | SearchError) => {
-                if ((moviesJoinedData as SearchError).error) {
-                    return of([(moviesJoinedData as SearchError).error]);
-                }
+                const moviesChosenInfo: Array<JoinedMovieData> = buildMoviesWithChosenInfo(fetchedAdditionalMovies);
                 return this.filmsToWatchFacade.filmsToWatchList$.pipe(
                     map((filmsToWatchList: Array<JoinedMovieDataCheckbox>) =>
-                        addCheckboxToFoundMovies(moviesJoinedData as Array<JoinedMovieData>, filmsToWatchList)
+                        addCheckboxToFoundMovies(moviesChosenInfo as Array<JoinedMovieData>, filmsToWatchList)
                     )
                 );
             }),
+
+            // catchError((errorObject: HttpErrorResponse) => {
+            //     console.log("ERROR IN COMPONENT", errorObject);
+            //     debugger;
+            //     const mes: string = this.handleError(errorObject);
+            //     return of([mes]);
+            // }),
             shareReplay(1),
             tap(() => (this.isLoading = false)),
             tap(() => (this.isMovieListHidden = false))
         );
     }
+
+    // public handleError(errorObject: HttpErrorResponse | string): string {
+    //     console.log(errorObject as HttpErrorResponse);
+    //     debugger;
+    //     let message: string = "";
+
+    //     if (this.isStringLodash(errorObject)) {
+    //         message = errorObject as string;
+    //     } else if ((errorObject as HttpErrorResponse).message) {
+    //         message = (errorObject as HttpErrorResponse).message;
+    //     } else if (
+    //         (errorObject as HttpErrorResponse).error &&
+    //         (errorObject as HttpErrorResponse).error.status_message
+    //     ) {
+    //         message = (errorObject as HttpErrorResponse).error.status_message;
+    //     } else {
+    //         message = constants.UNKNOWN_ERROR_MESSAGE;
+    //     }
+
+    //     return message;
+    // }
 
     // public ngOnDestroy(): void {
     //     this.fetchMoviesService.resetSearchQuery();
@@ -134,8 +163,10 @@ export class AppMovieSearchPageComponent implements OnInit /* , OnDestroy */ {
             this.isLastPage = false;
             this.isLoading = true;
             this.isMovieListHidden = true;
+            this.currentQuery = movieName;
+            this.currentPage = 1;
 
-            this.queryMoviesFacadeService.fetchMovies({ movieName, pageNumber: this.currentPage });
+            this.queryMoviesFacadeService.fetchMovies({ movieName: this.currentQuery, pageNumber: this.currentPage });
         }
     }
 
@@ -146,7 +177,7 @@ export class AppMovieSearchPageComponent implements OnInit /* , OnDestroy */ {
         this.currentPage++;
         if (!this.isLastPage) {
             this.isLoading = true;
-            this.queryMoviesFacadeService.getNextPage(this.currentPage);
+            this.queryMoviesFacadeService.fetchMovies({ movieName: this.currentQuery, pageNumber: this.currentPage });
         }
     }
 
